@@ -1,38 +1,43 @@
-import { Vec4 } from "./math/Vector";
+import { Material } from "./Material";
+import { Vec4, Vec3 } from "./math/Vector";
 import { Transform } from "./Tansform";
 
 export class Geometric extends Transform{
 
     positions:Vec4[] =  []
     colors:Vec4[] = []
+    nomarls: Vec3[] = []
     vertices:Vec4[] = []
-    vertexColors:Vec4[]=[]
+    vertexColors:Vec4[]= []
+    material : Material = new Material();
 
-
+    setMaterial (material: Material) {
+        this.material = material
+    }
 }
 
 
 export class Cube extends Geometric {
     vertices = [
-        new Vec4([-0.5, -0.5, 0.5, 1.0]),
-        new Vec4([-0.5, 0.5, 0.5, 1.0]),
-        new Vec4([0.5, 0.5, 0.5, 1.0]),
-        new Vec4([0.5, -0.5, 0.5, 1.0]),
-        new Vec4([-0.5, -0.5, -0.5, 1.0]),
-        new Vec4([-0.5, 0.5, -0.5, 1.0]),
-        new Vec4([0.5, 0.5, -0.5, 1.0]),
-        new Vec4([0.5, -0.5, -0.5, 1.0]),
+        new Vec4(-0.5, -0.5, 0.5),
+        new Vec4(-0.5, 0.5, 0.5),
+        new Vec4(0.5, 0.5, 0.5),
+        new Vec4(0.5, -0.5, 0.5),
+        new Vec4(-0.5, -0.5, -0.5),
+        new Vec4(-0.5, 0.5, -0.5),
+        new Vec4(0.5, 0.5, -0.5),
+        new Vec4(0.5, -0.5, -0.5),
     ]
 
     vertexColors = [
-        new Vec4(0.0, 0.0, 0.0, 1.0),  // black
-        new Vec4(1.0, 0.0, 0.0, 1.0),  // red
-        new Vec4(1.0, 1.0, 0.0, 1.0),  // yellow
-        new Vec4(0.0, 1.0, 0.0, 1.0),  // green
-        new Vec4(0.0, 0.0, 1.0, 1.0),  // blue
-        new Vec4(1.0, 0.0, 1.0, 1.0),  // magenta
-        new Vec4(0.0, 1.0, 1.0, 1.0),  // cyan
-        new Vec4(1.0, 1.0, 1.0, 1.0)   // white
+        new Vec4(0.0, 0.0, 0.0),  // black
+        new Vec4(1.0, 0.0, 0.0),  // red
+        new Vec4(1.0, 1.0, 0.0),  // yellow
+        new Vec4(0.0, 1.0, 0.0),  // green
+        new Vec4(0.0, 0.0, 1.0),  // blue
+        new Vec4(1.0, 0.0, 1.0),  // magenta
+        new Vec4(0.0, 1.0, 1.0),  // cyan
+        new Vec4(1.0, 1.0, 1.0)   // white
     ];
 
 
@@ -57,12 +62,17 @@ export class Cube extends Geometric {
 
     quad(a:number, b:number, c:number, d:number) {
         const indices = [a, b, c, a, c, d];
+        // 因为一个面的点的法向量相同，因此计算一次
+
+        const v1 = this.vertices[b].sub(this.vertices[a])
+        const v2 = this.vertices[c].sub(this.vertices[b])
+
+        const normal = v1.cross(v2)
+
         for ( var i = 0; i < indices.length; ++i ) {
             this.positions.push( this.vertices[indices[i]] );
-            //colors.push( vertexColors[indices[i]] );
-    
-            // for solid colored faces use
-            this.colors.push(this.vertexColors[a]);
+            this.colors.push(this.vertexColors[indices[i]]);
+            this.nomarls.push(normal)
         }
     }
 

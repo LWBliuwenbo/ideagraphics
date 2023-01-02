@@ -1,9 +1,10 @@
 import { Geometric } from "./Geometric"
-import { Vec4 } from "./math/Vector"
+import { Vec4,Vec3 } from "./math/Vector"
 import fragString from '../shader/frag.glsl?raw'
 import vertexString from '../shader/vertex.glsl?raw'
 import {Shader} from "./Shader"
 import { Camera } from "./Camera"
+import { Light } from "./Light"
 
 
 export default  class Engine {
@@ -12,6 +13,7 @@ export default  class Engine {
     canvas : HTMLCanvasElement
     scene: Geometric[]
     camera: Camera
+    light: Light
     theta: number[] = [0,0,0]
     thetaLoc: WebGLUniformLocation | null
     shaders: Shader[]
@@ -43,6 +45,7 @@ export default  class Engine {
         this.shaders = []
         this.transformShader = null
         this.camera = new Camera();
+        this.light = new Light();
     }
 
 
@@ -57,10 +60,21 @@ export default  class Engine {
     flatten(vecs : Vec4[]) {
         const buffer =  new Float32Array(vecs.length * 4)
         vecs.forEach((child, i)=> {
-            buffer[0 + 4*i] = child.out[0]
-            buffer[1 + 4*i] = child.out[1]
-            buffer[2 + 4*i] = child.out[2]
-            buffer[3 + 4*i] = child.out[3]
+            buffer[0 + 4*i] = child.x
+            buffer[1 + 4*i] = child.y
+            buffer[2 + 4*i] = child.z
+            buffer[3 + 4*i] = child.r
+        })
+
+        return buffer
+    }
+
+    flattenV3(vecs : Vec3[]) {
+        const buffer =  new Float32Array(vecs.length * 3)
+        vecs.forEach((child, i)=> {
+            buffer[0 + 3*i] = child.x
+            buffer[1 + 3*i] = child.y
+            buffer[2 + 3*i] = child.z
         })
 
         return buffer
@@ -78,19 +92,33 @@ export default  class Engine {
     setCamera(camera: Camera) {
         this.camera = camera;
     }
+    setLight(light: Light) {
+        this.light = light;
+    }
 
     pipelineSetShaderAttr(shader: Shader, geo: Geometric) {
 
         const {gl} = this;
         gl.useProgram(shader.program);
 
-        const cBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer)
-        gl.bufferData(gl.ARRAY_BUFFER, this.flatten(geo.colors), gl.STATIC_DRAW)
 
-        const cLoc = gl.getAttribLocation(shader.program, 'aColor')
-        gl.vertexAttribPointer( cLoc, 4, gl.FLOAT, false, 0, 0)
-        gl.enableVertexAttribArray(cLoc) 
+        const nBuf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, nBuf);
+        gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.nomarls), gl.STATIC_DRAW)
+
+        console.log( this.flattenV3(geo.nomarls))
+
+        const nLoc = gl.getAttribLocation(shader.program, "aNormal");
+        gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0)
+        gl.enableVertexAttribArray(nLoc)
+
+        // const cBuffer = gl.createBuffer();
+        // gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer)
+        // gl.bufferData(gl.ARRAY_BUFFER, this.flatten(geo.colors), gl.STATIC_DRAW)
+
+        // const cLoc = gl.getAttribLocation(shader.program, 'aColor')
+        // gl.vertexAttribPointer( cLoc, 4, gl.FLOAT, false, 0, 0)
+        // gl.enableVertexAttribArray(cLoc) 
 
         const vBuf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuf);
@@ -100,13 +128,23 @@ export default  class Engine {
         gl.vertexAttribPointer(pLoc, 4, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(pLoc)
 
+
     }
     pipelineTransformShaderInit(geo: Geometric) {
-        this.transformShader = new Shader(this.gl, ['uTheta', 'uTranslate', 
-            'uScale', 'uModelView', 'uProject'], vertexString, fragString )
+        this.transformShader = new Shader(this.gl, 
+            ['uTheta', 'uTranslate', 'uScale', 
+             'uModelView', 'uProject',
+             'uAmbientProduct', 'uDiffuseProduct', 'uSpecularProduct',
+             'uLightPosition', 'uShininess'
+        ], vertexString, fragString )
         this.pipelineSetShaderAttr(this.transformShader, geo) 
         this.transformShader.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
         this.transformShader.setUniformMat4fv('uProject', this.camera.projectionMatrix)
+        this.transformShader.setUniform4fv('uAmbientProduct', this.light.lightAmbient.multV(geo.material.matrialAmbient) )
+        this.transformShader.setUniform4fv('uDiffuseProduct', this.light.lightDiffuse.multV(geo.material.matrialDiffuse) )
+        this.transformShader.setUniform4fv('uSpecularProduct', this.light.lightSpecular.multV(geo.material.matrialSpecular) )
+        this.transformShader.setUniform4fv('uLightPosition', this.light.lightPosition)
+        this.transformShader.setUniformf('uShininess', geo.material.materialShininess)
     }
     pipelineTransformRender(geo: Geometric) {
         if(this.transformShader){

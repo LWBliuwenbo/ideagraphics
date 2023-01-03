@@ -1,5 +1,5 @@
 import { Geometric } from "./Geometric"
-import { Vec4,Vec3 } from "./math/Vector"
+import { Vec4,Vec3, Vec2 } from "./math/Vector"
 import fragString from '../shader/frag.glsl?raw'
 import vertexString from '../shader/vertex.glsl?raw'
 import {Shader} from "./Shader"
@@ -80,6 +80,16 @@ export default  class Engine {
         return buffer
     }
 
+    flattenV2(vecs : Vec2[]) {
+        const buffer =  new Float32Array(vecs.length * 2)
+        vecs.forEach((child, i)=> {
+            buffer[0 + 2*i] = child.x
+            buffer[1 + 2*i] = child.y
+        })
+
+        return buffer
+    }
+
     pipelineInit() {
         this.scene.forEach((geo)=> {
             this.pipelineTransformShaderInit(geo);
@@ -101,12 +111,10 @@ export default  class Engine {
         const {gl} = this;
         gl.useProgram(shader.program);
 
-
+        // 法向量
         const nBuf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf);
         gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.nomarls), gl.STATIC_DRAW)
-
-        console.log( this.flattenV3(geo.nomarls))
 
         const nLoc = gl.getAttribLocation(shader.program, "aNormal");
         gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0)
@@ -120,6 +128,8 @@ export default  class Engine {
         // gl.vertexAttribPointer( cLoc, 4, gl.FLOAT, false, 0, 0)
         // gl.enableVertexAttribArray(cLoc) 
 
+
+        // 顶点位置
         const vBuf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuf);
         gl.bufferData(gl.ARRAY_BUFFER,  this.flatten(geo.positions), gl.STATIC_DRAW)
@@ -128,24 +138,50 @@ export default  class Engine {
         gl.vertexAttribPointer(pLoc, 4, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(pLoc)
 
+        // 纹理坐标
+        const textureBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV2(geo.textureCoords), gl.STATIC_DRAW) 
+
+        const textureLoc = gl.getAttribLocation(shader.program, "aTextureCoord");
+        gl.vertexAttribPointer(textureLoc, 2, gl.FLOAT, false, 0, 0)
+        gl.enableVertexAttribArray(textureLoc)
 
     }
     pipelineTransformShaderInit(geo: Geometric) {
         this.transformShader = new Shader(this.gl, 
             ['uTheta', 'uTranslate', 'uScale', 
              'uModelView', 'uProject',
-             'uAmbientProduct', 'uDiffuseProduct', 'uSpecularProduct',
-             'uLightPosition', 'uShininess'
+             'uLightAmbient', 'uLightDiffuse', 'uLightSpecular',
+             'uLightPosition', 'uShininess',
+             'uMaterialDiffuse','uMaterialSpecular'
         ], vertexString, fragString )
+
         this.pipelineSetShaderAttr(this.transformShader, geo) 
+        // 模视 和 投影变换
         this.transformShader.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
         this.transformShader.setUniformMat4fv('uProject', this.camera.projectionMatrix)
-        this.transformShader.setUniform4fv('uAmbientProduct', this.light.lightAmbient.multV(geo.material.matrialAmbient) )
-        this.transformShader.setUniform4fv('uDiffuseProduct', this.light.lightDiffuse.multV(geo.material.matrialDiffuse) )
-        this.transformShader.setUniform4fv('uSpecularProduct', this.light.lightSpecular.multV(geo.material.matrialSpecular) )
+        // 光照
+        this.transformShader.setUniform4fv('uLightAmbient', this.light.lightAmbient )
+        this.transformShader.setUniform4fv('uLightDiffuse', this.light.lightDiffuse )
+        this.transformShader.setUniform4fv('uLightSpecular', this.light.lightSpecular )
         this.transformShader.setUniform4fv('uLightPosition', this.light.lightPosition)
+        
+        // 材质
         this.transformShader.setUniformf('uShininess', geo.material.materialShininess)
+        
+        // 漫反射贴图
+        this.gl.activeTexture(this.gl.TEXTURE0)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.material.matrialDiffuseTexture.texture)
+        this.transformShader.setUniformi('uMaterialDiffuse', 0)
+
+        // 镜面反色贴图
+        this.gl.activeTexture(this.gl.TEXTURE1)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.material.matrialSpecularTexture.texture)
+        this.transformShader.setUniformi('uMaterialSpecular', 1)
+    
     }
+
     pipelineTransformRender(geo: Geometric) {
         if(this.transformShader){
             this.transformShader.setUniform3fv('uTheta', geo.roateTheta)

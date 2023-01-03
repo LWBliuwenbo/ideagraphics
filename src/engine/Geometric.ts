@@ -1,5 +1,5 @@
 import { Material } from "./Material";
-import { Vec4, Vec3 } from "./math/Vector";
+import { Vec4, Vec3, Vec2 } from "./math/Vector";
 import { Transform } from "./Tansform";
 
 export class Geometric extends Transform{
@@ -9,6 +9,7 @@ export class Geometric extends Transform{
     nomarls: Vec3[] = []
     vertices:Vec4[] = []
     vertexColors:Vec4[]= []
+    textureCoords: Vec2[] = []
     material : Material = new Material();
 
     setMaterial (material: Material) {
@@ -41,6 +42,8 @@ export class Cube extends Geometric {
     ];
 
 
+
+
     positions:Vec4[] =  []
     colors:Vec4[] = []
 
@@ -69,6 +72,14 @@ export class Cube extends Geometric {
 
         const normal = v1.cross(v2)
 
+        this.textureCoords = this.textureCoords.concat([
+            new Vec2(0.0, 0.0),
+            new Vec2(1.0, 0.0),
+            new Vec2(1.1, 1.1),
+            new Vec2(0.0, 0.0),
+            new Vec2(1.0, 1.0),
+            new Vec2(0.0, 1.0),
+        ])
         for ( var i = 0; i < indices.length; ++i ) {
             this.positions.push( this.vertices[indices[i]] );
             this.colors.push(this.vertexColors[indices[i]]);

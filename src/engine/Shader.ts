@@ -21,6 +21,9 @@ export class Shader {
     setUniform4fv(uniform: string, value: Vec4) {
         this.gl.uniform4fv(this.uniformLocs[uniform], value.flattrn())
     }
+    setUniformi(uniform: string, i: number) {
+        this.gl.uniform1i(this.uniformLocs[uniform], i)
+    }
     setUniformMat4fv(uniform:string, mat4: Mat4 ) {
         this.gl.uniformMatrix4fv(this.uniformLocs[uniform], false, mat4.flattrn());
     }

@@ -1,23 +1,72 @@
 export class Vec2 {
-    out = new Array<number>(2)
+    x:number = 0.0
+    y:number = 0.0
     type = "vec2"
 
-    constructor(arg1: number[]);
+    constructor(x: number, y: number);
     constructor(arg2: Vec2);
     constructor();
 
 
 
-    constructor( arg?: any) {
-        if(arg === undefined){
-            this.out = [0.0, 0.0]
-        }else if(arg.type === 'vec2'){
-            this.out = [...arg.out];
+    constructor( arg1?: any, arg2?:any) {
+        if(arg1 === undefined){
+        
+        }else if(arg1.type === 'vec2'){
+            this.x = arg1.x
+            this.y = arg1.y
         }else {
-            this.out[0] = arg[0]
-            this.out[1] = arg[1]
+            this.x = arg1
+            this.y = arg2
         }
     }
+
+    burden() {
+        const {x, y} = this;
+        return new Vec2(-x, -y )
+    }
+
+    add(v: Vec2) {
+        const {x, y} = this;
+        return new Vec2(x+v.x, y+v.y)
+    }
+
+    sub(v: Vec2) {
+        const {x, y} = this;
+        return new Vec2(x-v.x, y-v.y)
+    }
+
+    normalize():Vec2{
+        const {x, y} = this;
+
+        const magsql = Math.sqrt(x*x + y*y)
+        if(magsql == 0){
+            return this
+        }
+        const overmag = 1.0 / magsql;
+        return new Vec2(x*overmag, y*overmag)
+    }
+    dot(v: Vec2) {
+        const {x, y}  = this;
+        return x* v.x + y* v.y
+    }
+
+    mag() {
+        const {x, y} = this;
+
+        return Math.sqrt(x*x + y*y)
+    }
+
+    cross(v: Vec2) {
+        const {x, y} = this;
+        return new Vec2( y*v.x - x*v.y,  x*v.y - y*v.x )
+    }
+
+    mult(n: number) {
+        const {x, y} = this;
+        return new Vec2(x* n , y* n)
+    }
+
 }
 
 export class Vec3 {

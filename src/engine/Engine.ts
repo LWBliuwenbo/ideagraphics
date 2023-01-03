@@ -135,7 +135,7 @@ export default  class Engine {
             ['uTheta', 'uTranslate', 'uScale', 
              'uModelView', 'uProject',
              'uAmbientProduct', 'uDiffuseProduct', 'uSpecularProduct',
-             'uLightPosition', 'uShininess'
+             'uLightPosition', 'uShininess','uViewPos'
         ], vertexString, fragString )
         this.pipelineSetShaderAttr(this.transformShader, geo) 
         this.transformShader.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
@@ -145,6 +145,8 @@ export default  class Engine {
         this.transformShader.setUniform4fv('uSpecularProduct', this.light.lightSpecular.multV(geo.material.matrialSpecular) )
         this.transformShader.setUniform4fv('uLightPosition', this.light.lightPosition)
         this.transformShader.setUniformf('uShininess', geo.material.materialShininess)
+        this.transformShader.setUniform3fv('uViewPos', this.camera.viewPosition.flattrn())
+
     }
     pipelineTransformRender(geo: Geometric) {
         if(this.transformShader){

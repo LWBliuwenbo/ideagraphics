@@ -24,6 +24,9 @@ uniform vec4 uLightPosition;
 // 高光
 uniform float uShininess;
 
+// 眼睛方向
+uniform vec4 uViewPos;
+
 
 
 
@@ -69,7 +72,7 @@ void main()
 
     // 光照计算
 
-    vec3 pos = -(uModelView * (rz * ry * rx) * tScale * tMat * aPosition).xyz;
+    vec3 pos = (uModelView * (rz * ry * rx) * tScale * tMat * aPosition).xyz;
 
     // 光源位置 
     vec3 light = uLightPosition.xyz;
@@ -77,7 +80,7 @@ void main()
     vec3 L = normalize(light - pos);
     
     // 计算半角向量
-    vec3 E = normalize(-pos);
+    vec3 E = normalize(uViewPos.xyz - pos);
     vec3 H = normalize(L + E);
 
     vec4 NH = vec4(aNormal, 0);
@@ -93,7 +96,7 @@ void main()
     vec4 diffuse = Kd*uDiffuseProduct;
 
     // 计算镜面反射光分量
-    float Ks = pow(max( dot( N, H ), 0.0 ), uShininess);
+    float Ks = pow(max( dot( N, H ), 0.0 ), 10.0);
     vec4 specular = Ks * uSpecularProduct;
 
     // 如果方向为反

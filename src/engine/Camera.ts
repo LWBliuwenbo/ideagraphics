@@ -5,6 +5,8 @@ import { Vec3, Vec4 } from "./math/Vector";
 
 export class Camera {
 
+    viewPosition: Vec3 = new Vec3();
+
     // 模视变换矩阵 
     modelViewMatrix: Mat4 = new Mat4([])
     // 投影变换矩阵
@@ -34,6 +36,8 @@ export class Camera {
             n.z, u.z, bv.z, 0,
             -n.dot(eye), -u.dot(eye), -bv.dot(eye), 1.0
         ])
+
+        this.viewPosition = eye;
 
         return this;
     }

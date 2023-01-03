@@ -153,7 +153,7 @@ export default  class Engine {
             ['uTheta', 'uTranslate', 'uScale', 
              'uModelView', 'uProject',
              'uLightAmbient', 'uLightDiffuse', 'uLightSpecular',
-             'uLightPosition', 'uShininess',
+             'uLightPosition', 'uShininess', 'uViewPosition',
              'uMaterialDiffuse','uMaterialSpecular'
         ], vertexString, fragString )
 
@@ -161,6 +161,9 @@ export default  class Engine {
         // 模视 和 投影变换
         this.transformShader.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
         this.transformShader.setUniformMat4fv('uProject', this.camera.projectionMatrix)
+        this.transformShader.setUniform3fv('uViewPosition', this.camera.viewPosition)
+
+
         // 光照
         this.transformShader.setUniform4fv('uLightAmbient', this.light.lightAmbient )
         this.transformShader.setUniform4fv('uLightDiffuse', this.light.lightDiffuse )

@@ -14,6 +14,8 @@ uniform vec4 uLightDiffuse;
 uniform vec4 uLightSpecular; 
 // 光源位置
 uniform vec4 uLightPosition;
+// 眼睛位置
+uniform vec3 uViewPosition;
 // 高光
 uniform float uShininess;
 
@@ -29,7 +31,7 @@ void main() {
     vec3 L = normalize(light - fragPos);
     
     // 计算半角向量
-    vec3 E = normalize(-fragPos);
+    vec3 E = normalize(uViewPosition - fragPos);
     vec3 H = normalize(L + E);
 
 
@@ -44,7 +46,7 @@ void main() {
     vec4 diffuse = Kd*uLightDiffuse*texture(uMaterialDiffuse, vTextureCoord);
 
     // 计算镜面反射光分量
-    float Ks = pow(max( dot( N, H ), 0.0 ), uShininess);
+    float Ks = pow(max( dot( N, H ), 0.0 ), 32.0);
     vec4 specular = Ks*uLightSpecular*texture(uMaterialSpecular, vTextureCoord);
 
     // 如果方向为反

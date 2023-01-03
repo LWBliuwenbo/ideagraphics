@@ -17,7 +17,7 @@ var phi = 0 / 180 * Math.PI;
 const engineRender = async () => {
     light.setPosition(new Vec4(3.0, 3.0, 3.0, 1.0))
     light.setAmbient(new Vec4(0.3, 0.3, 0.3))
-    light.setDiffuse(new Vec4(1, 1, 1))
+    light.setDiffuse(new Vec4(0.5, 0.5, 0.5))
     light.setSpecular(new Vec4(1, 1, 1))
 
     engine.setLight(light)

@@ -94,7 +94,14 @@ export class Vec3 {
             this.z = arg3
         }
     }
+    isVec3() {
+        return true
+    }
+    flattrn() {
+        const {x, y, z} = this;
 
+        return new Float32Array([x, y, z])
+    }
     burden() {
         const {x, y, z} = this;
         return new Vec3(-x, -y, -z )

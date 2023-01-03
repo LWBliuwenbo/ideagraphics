@@ -63,12 +63,11 @@ void main()
     );
 
 
-    // 光照计算
-    vec4 NH = vec4(aNormal, 0);
 
-    fragPos = -(uModelView * (rz * ry * rx) * tScale * tMat * aPosition).xyz;
+
+    fragPos = ((rz * ry * rx) * tScale * tMat * aPosition).xyz;
     // 计算法向量转换
-    Normal = normalize((uModelView * (rz * ry * rx) * tScale * tMat * NH).xyz);
+    Normal = mat3(transpose(inverse((rz * ry * rx) * tScale * tMat))) * aNormal;
 
 
     gl_Position = uProject * uModelView * (rz * ry * rx) * tScale * tMat * aPosition;

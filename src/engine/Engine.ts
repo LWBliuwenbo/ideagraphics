@@ -114,7 +114,7 @@ export default  class Engine {
         // 法向量
         const nBuf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf);
-        gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.nomarls), gl.STATIC_DRAW)
+        gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.normals), gl.STATIC_DRAW)
 
         const nLoc = gl.getAttribLocation(shader.program, "aNormal");
         gl.vertexAttribPointer(nLoc, 3, gl.FLOAT, false, 0, 0)

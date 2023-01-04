@@ -46,10 +46,10 @@ const engineRender = async () => {
 
         theta = theta + 2.0
 
-        e.scene[0].scaleX(0.8)
-        e.scene[0].scaleY(0.8)
-        e.scene[0].scaleZ(0.8)
-        e.scene[0].roateZ(theta)
+        // e.scene[0].scaleX(0.8)
+        // e.scene[0].scaleY(0.8)
+        // e.scene[0].scaleZ(0.8)
+        // e.scene[0].roateZ(theta)
         // e.scene[0].roateX(theta)
     })
 

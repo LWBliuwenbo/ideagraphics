@@ -31,6 +31,7 @@ void main()
     vec3 c = cos(angles);
     vec3 s = sin(angles);
 
+
     // Remeber: thse matrices are column-major
     mat4 rx = mat4(1.0,  0.0,  0.0, 0.0,
 		    0.0,  c.x,  s.x, 0.0,
@@ -64,13 +65,14 @@ void main()
 
 
 
+    mat4 model = (rz * ry * rx) * tScale * tMat;
 
-    fragPos = ((rz * ry * rx) * tScale * tMat * aPosition).xyz;
+    fragPos = ( model * aPosition).xyz;
     // 计算法向量转换
-    Normal = mat3(transpose(inverse((rz * ry * rx) * tScale * tMat))) * aNormal;
+    Normal = mat3(transpose(inverse(model))) * aNormal;
 
 
-    gl_Position = uProject * uModelView * (rz * ry * rx) * tScale * tMat * aPosition;
+    gl_Position = uProject * uModelView * model * aPosition;
 
     vTextureCoord = aTextureCoord;
 

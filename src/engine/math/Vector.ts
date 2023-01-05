@@ -246,4 +246,9 @@ export class Vec4 {
         return new Vec4(x* v.x , y* v.y, z*v.z)
     }
 
+    xyz() {
+        const {x, y, z} = this;
+        return new Vec3(x, y, z)
+    }
+
 }

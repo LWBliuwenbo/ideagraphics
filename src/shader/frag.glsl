@@ -39,22 +39,23 @@ void main() {
     vec3 N = Normal;
 
     // 环境光分量
-    vec4 ambient = uLightAmbient * texture(uMaterialDiffuse, vTextureCoord);
+    vec3 ambient = uLightAmbient.xyz * texture(uMaterialDiffuse, vTextureCoord).rgb;
 
     // 计算漫反射光分量
     float Kd = max( dot(L, N), 0.0 );
-    vec4 diffuse = Kd*uLightDiffuse*texture(uMaterialDiffuse, vTextureCoord);
+    vec3 diffuse = Kd*uLightDiffuse.xyz*texture(uMaterialDiffuse, vTextureCoord).rgb;
 
     // 计算镜面反射光分量
-    float Ks = pow(max( dot( N, H ), 0.0 ), 32.0);
-    vec4 specular = Ks*uLightSpecular*texture(uMaterialSpecular, vTextureCoord);
+    float Ks = pow(max( dot( N, H ), 0.0 ), uShininess);
+    vec3 specular = Ks*uLightSpecular.xyz*texture(uMaterialSpecular, vTextureCoord).rgb;
 
     // 如果方向为反
     if(dot(L, N) < 0.0){
-        specular = vec4(0.0, 0.0, 0.0, 1.0);
+        specular = vec3(0.0, 0.0, 0.0);
     }
     
     
-    fColor = ambient + diffuse + specular;
+    vec3 result = ambient + diffuse + specular;
+    fColor = vec4(result, 1.0);
     // fColor = texture(uMaterialDiffuse, vTextureCoord) + texture(uMaterialSpecular, vTextureCoord);
 }

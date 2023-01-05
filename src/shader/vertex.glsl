@@ -69,11 +69,12 @@ void main()
 
     fragPos = ( model * aPosition).xyz;
     // 计算法向量转换
-    Normal = mat3(transpose(inverse(model))) * aNormal;
+    Normal = mat3(transpose(inverse( model))) * aNormal;
 
-
-    gl_Position = uProject * uModelView * model * aPosition;
 
     vTextureCoord = aTextureCoord;
+    
+    gl_Position = uProject * uModelView * model * aPosition;
+
 
 }

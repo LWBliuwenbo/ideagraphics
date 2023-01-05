@@ -1,7 +1,7 @@
 import { Geometric } from "./Geometric"
 import { Vec4,Vec3, Vec2 } from "./math/Vector"
-import fragString from '../shader/frag.glsl?raw'
-import vertexString from '../shader/vertex.glsl?raw'
+import fragString from '../shader/NormalMap.frag.glsl?raw'
+import vertexString from '../shader/NormalMap.vertex.glsl?raw'
 import {Shader} from "./Shader"
 import { Camera } from "./Camera"
 import { Light } from "./Light"
@@ -147,6 +147,24 @@ export default  class Engine {
         gl.vertexAttribPointer(textureLoc, 2, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(textureLoc)
 
+        // 法相切线
+        const tangentBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, tangentBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.tagents), gl.STATIC_DRAW) 
+
+        const tanagentLoc = gl.getAttribLocation(shader.program, "aTangent");
+        gl.vertexAttribPointer(tanagentLoc, 3, gl.FLOAT, false, 0, 0)
+        gl.enableVertexAttribArray(tanagentLoc)
+
+        // 次切线
+        const bitanBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, bitanBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.bitagents), gl.STATIC_DRAW) 
+
+        const bitanLoc = gl.getAttribLocation(shader.program, "aBitangent");
+        gl.vertexAttribPointer(bitanLoc, 3, gl.FLOAT, false, 0, 0)
+        gl.enableVertexAttribArray(bitanLoc)
+
     }
     pipelineTransformShaderInit(geo: Geometric) {
         this.transformShader = new Shader(this.gl, 
@@ -154,7 +172,7 @@ export default  class Engine {
              'uModelView', 'uProject',
              'uLightAmbient', 'uLightDiffuse', 'uLightSpecular',
              'uLightPosition', 'uShininess', 'uViewPosition',
-             'uMaterialDiffuse','uMaterialSpecular'
+             'uMaterialDiffuse','uMaterialSpecular', 'uMaterialNormalMap'
         ], vertexString, fragString )
 
         this.pipelineSetShaderAttr(this.transformShader, geo) 
@@ -179,9 +197,14 @@ export default  class Engine {
         this.transformShader.setUniformi('uMaterialDiffuse', 0)
 
         // 镜面反色贴图
+        // this.gl.activeTexture(this.gl.TEXTURE1)
+        // this.gl.bindTexture(this.gl.TEXTURE_2D, geo.material.matrialSpecularTexture.texture)
+        // this.transformShader.setUniformi('uMaterialSpecular', 1)
+
+        // 法向贴图
         this.gl.activeTexture(this.gl.TEXTURE1)
-        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.material.matrialSpecularTexture.texture)
-        this.transformShader.setUniformi('uMaterialSpecular', 1)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.material.normalMap.texture)
+        this.transformShader.setUniformi('uMaterialNormalMap', 1)
     
     }
 

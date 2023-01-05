@@ -12,6 +12,8 @@ export class Material {
     matrialDiffuseTexture: Texture  = new Texture();
     // 镜面反射贴图
     matrialSpecularTexture: Texture = new Texture();
+    // 法相贴图
+    normalMap: Texture =  new Texture();
     // 高光系数
     materialShininess : number = 100.0
 }

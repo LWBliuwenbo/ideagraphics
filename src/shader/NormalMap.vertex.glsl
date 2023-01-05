@@ -73,7 +73,7 @@ void main()
 
     fragPos = ( model * aPosition).xyz;
     // 计算法向量转换
-    NormalMat = mat3(transpose(inverse( model)));
+    mat3 NormalMat = mat3(transpose(inverse( model)));
 
 
     vTextureCoord = aTextureCoord;

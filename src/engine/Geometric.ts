@@ -156,7 +156,7 @@ export class Cube extends Geometric {
     vertexColors = [
         new Vec4(0.0, 0.0, 0.0),  // black
         new Vec4(1.0, 0.0, 0.0),  // red
-        new Vec4(1.0, 1.0, 0.0),  // yellow
+        new Vec4(1.0, 1.0, 0.0),  // yellow 
         new Vec4(0.0, 1.0, 0.0),  // green
         new Vec4(0.0, 0.0, 1.0),  // blue
         new Vec4(1.0, 0.0, 1.0),  // magenta
@@ -175,24 +175,36 @@ export class Cube extends Geometric {
         this.computeTagent(this.positions, this.textureCoords);
     }
     // 计算法线空间切线 和 副切线
-    computeTagent(positions:Vec4[], uvs: Vec4[]) {
+    computeTagent(positions:Vec4[], uvs: Vec2[]) {
 
         const tagents:Vec3[] = [];
         const bitagents:Vec3[] = [];
         for(let i = 0; i< positions.length; i++){
-            const index_of_quad = i%3;
+            let index_of_quad_start = i < 3 ? 0 : Math.floor((i)/3)*3;
+
+            if(index_of_quad_start > positions.length - 3 - 1){
+                index_of_quad_start = positions.length - 3;
+            }
+
+            const index1 = index_of_quad_start;
+            const index2 = index_of_quad_start + 1;
+            const index3 = index_of_quad_start + 2;
+
+            console.log(index1, index2, index3)
+
+
             let pos1:Vec3; let pos2: Vec3; let pos3: Vec3;
             let uv1:Vec2; let uv2: Vec2; let uv3: Vec2;
 
             const tagent = new Vec3(0,0,0);
             const bitagent= new Vec3(0,0,0)
        
-            pos1 = positions[i+ index_of_quad - 2].xyz()
-            pos2 = positions[i+ index_of_quad - 1].xyz()
-            pos3 = positions[i+ index_of_quad].xyz();
-            uv1 = uvs[i+ index_of_quad - 2]
-            uv2 = uvs[i+ index_of_quad - 1]
-            uv3 = uvs[i+ index_of_quad]
+            pos1 = positions[index1 ].xyz()
+            pos2 = positions[index2].xyz()
+            pos3 = positions[index3].xyz();
+            uv1 = uvs[index1]
+            uv2 = uvs[index2]
+            uv3 = uvs[index3]
 
 
             const edge1: Vec3 = pos2.sub(pos1)
@@ -208,12 +220,12 @@ export class Cube extends Geometric {
             tagent.y = f* ( deltaUV2.y*edge1.y - deltaUV1.y * edge2.y )
             tagent.z = f* ( deltaUV2.y*edge1.z - deltaUV1.y * edge2.z )
 
-            bitagent.x = f* ( deltaUV2.x*edge1.x - deltaUV1.x * edge2.x )
-            bitagent.y = f* ( deltaUV2.x*edge1.y - deltaUV1.x * edge2.y )
-            bitagent.z = f* ( deltaUV2.x*edge1.z - deltaUV1.x * edge2.z )
+            bitagent.x = f* ( -deltaUV2.x*edge1.x + deltaUV1.x * edge2.x )
+            bitagent.y = f* ( -deltaUV2.x*edge1.y + deltaUV1.x * edge2.y )
+            bitagent.z = f* ( -deltaUV2.x*edge1.z + deltaUV1.x * edge2.z )
 
             const tagent_n = tagent.normalize();
-            const bitagent_n = tagent.normalize();
+            const bitagent_n = bitagent.normalize();
 
             tagents.push(tagent_n);
             bitagents.push(bitagent_n)

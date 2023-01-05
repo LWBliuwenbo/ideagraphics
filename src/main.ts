@@ -18,7 +18,7 @@ const engineRender = async () => {
     light.setPosition(new Vec4(1.0, 1.0, 2.0, 1.0))
     light.setAmbient(new Vec4(0.3, 0.3, 0.3))
     light.setDiffuse(new Vec4(1, 1, 1))
-    light.setSpecular(new Vec4(1.0, 1.0, 1.0))
+    light.setSpecular(new Vec4(0.3, 0.3, 0.3))
 
     engine.setLight(light)
 
@@ -33,9 +33,9 @@ const engineRender = async () => {
 
     const cube = new Cube();
     const material = new Material();
-    material.matrialSpecularTexture = await Texture.createTexture(engine.gl, './container2_specular.png') as Texture
-    material.matrialDiffuseTexture = await Texture.createTexture(engine.gl, './container2.png') as Texture
-
+    // material.matrialSpecularTexture = await Texture.createTexture(engine.gl, './container2_specular.png') as Texture
+    material.matrialDiffuseTexture = await Texture.createTexture(engine.gl, './brickwall.jpg') as Texture
+    material.normalMap = await await Texture.createTexture(engine.gl, './brickwall_normal.jpg') as Texture
 
     cube.setMaterial(material)
 
@@ -44,13 +44,12 @@ const engineRender = async () => {
     engine.pipelineInit();
     engine.pipelineRender((e) => {
 
-        theta = theta + 2.0
+        theta = theta + 1.0
 
         // e.scene[0].scaleX(0.8)
         // e.scene[0].scaleY(0.8)
         // e.scene[0].scaleZ(0.8)
         e.scene[0].roateX(theta)
-        e.scene[0].roateY(theta)
         // e.scene[0].roateX(theta)
     })
 

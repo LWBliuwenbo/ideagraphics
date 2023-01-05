@@ -23,7 +23,7 @@ uniform vec3 uViewPosition;
 uniform float uShininess;
 
 uniform sampler2D uMaterialDiffuse; // 拾色器
-uniform sampler2D uMaterialSpecular; // 拾色器
+// uniform sampler2D uMaterialSpecular; // 拾色器
 uniform sampler2D uMaterialNormalMap; // 法向贴图
 
 out vec4 fColor;
@@ -55,7 +55,7 @@ void main() {
 
     // 计算镜面反射光分量
     float Ks = pow(max( dot( N, H ), 0.0 ), uShininess);
-    vec3 specular = Ks*uLightSpecular.xyz*texture(uMaterialSpecular, vTextureCoord).rgb;
+    vec3 specular = Ks * uLightSpecular.rgb;
 
     // 如果方向为反
     if(dot(L, N) < 0.0){

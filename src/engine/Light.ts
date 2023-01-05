@@ -8,6 +8,10 @@ export class Light {
 
     // 光源位置
     lightPosition: Vec4 = new Vec4;
+
+    // color for pbr
+    lightColor:Vec4 = new Vec4;
+
     // 光源颜色：环境光分量
     lightAmbient: Vec4 = new Vec4;
     // 光源颜色：漫反射光分量
@@ -17,6 +21,10 @@ export class Light {
 
     setPosition(p: Vec4) {
         this.lightPosition = p;
+    }
+
+    setColor(color:Vec4) {
+        this.lightColor = color;
     }
 
     setAmbient(v: Vec4) {

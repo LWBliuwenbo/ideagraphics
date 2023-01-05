@@ -1,23 +1,39 @@
-//version 300 es
+#version 300 es
 
 precision mediump float;
 
 in vec2 vTextureCoord; // 纹理坐标
-in vec3 fragPos; // 片元位置
-in vec3 Normal; // 法向量
+in vec3 fragPos;
+in vec3 Normal;
 in vec3 tangent;
 in vec3 bitangent;
 in mat3 TBN;
+in vec3 radiance; // 光照辐射度 
 
-// 灯光
+
+// 光照计算所需变量
+// 环境光颜色分量与材质反色属性各分量相乘
+// uniform vec4 uLightAmbient;
+// uniform vec4 uLightDiffuse;
+// uniform vec4 uLightSpecular; 
+
+uniform vec4 uLightColor;
+
+// 光源位置
 uniform vec4 uLightPosition;
 // 眼睛位置
 uniform vec3 uViewPosition;
-uniform sampler2D uMaterialColorMap; // 拾色器
-uniform sampler2D uMaterialNormalMap; // 拾色器
+// 高光
+uniform float uShininess;
 
-// 固有色
-uniform vec3 baseColor;
+uniform sampler2D uMaterialDiffuse; // 拾色器
+// uniform sampler2D uMaterialSpecular; // 拾色器
+uniform sampler2D uMaterialNormalMap; // 法向贴图
+
+out vec4 fColor;
+
+// 固有色 使用纹理传入
+// uniform vec3 baseColor;
 
 /*
 金属度，规定电介质为0，金属为1；
@@ -63,13 +79,13 @@ uniform float clearcoatGloss;
 const float PI = 3.14159265358979323846;
 
 // 平方函数
-float sqr(float x) { return x * x}
+float sqr(float x) { return x * x;}
 
 //入参u时视方向与法线的点积
 //返回F0为0情况下的SchlickFresnel的解，既0 + (1-0)(1-vdoth)^5
 float SchlickFresnel(float u)
 {
-    float m = clamp(1-u, 0, 1);//将1-vdoth的结果限制在[0,1]空间内 
+    float m = clamp(1.0 - u, 0.0, 1.0);//将1-vdoth的结果限制在[0,1]空间内 
     float m2 = m*m;
     return m2*m2*m; // pow(m,5) 求5次方
 }
@@ -80,18 +96,20 @@ float GTR1(float NdotH, float a)
 {
     //考虑到粗糙度a在等于1的情况下，公式返回值无意义，因此固定返回1/pi，
     //说明在完全粗糙的情况下，各个方向的法线分布均匀，且积分后得1
-    if (a >= 1) return 1/PI;
+    if (a >= 1.0) {
+        return 1.0/PI;
+    };
 
     float a2 = a*a;
-    float t = 1 + (a2-1)*NdotH*NdotH; //公式主部
-    return (a2-1) / (PI*log(a2)*t);   //GTR1的c，迪士尼取值为：(a2-1)/(PI*log(a2))
+    float t = 1.0 + (a2-1.0)*NdotH*NdotH; //公式主部
+    return (a2-1.0) / (PI*log(a2)*t);   //GTR1的c，迪士尼取值为：(a2-1)/(PI*log(a2))
 }
 
 //GTR 2(主镜面波瓣，gamma=2) 先用于基础层材质（Base Material）用于各项同性的金属或非金属（俗称下层高光）
 float GTR2(float NdotH, float a)
 {
     float a2 = a*a;
-    float t = 1 + (a2-1)*NdotH*NdotH;
+    float t = 1.0 + (a2-1.0)*NdotH*NdotH;
     return a2 / (PI * t*t);  //GTR2的c，迪士尼取值为:a2/PI
 }
 
@@ -101,7 +119,7 @@ float GTR2(float NdotH, float a)
 //ax 和 ay 分别是这2个方向上的可感粗糙度，范围是0~1 
 float GTR2_aniso(float NdotH, float HdotX, float HdotY, float ax, float ay)
 {
-    return 1 / (PI * ax*ay * sqr( sqr(HdotX/ax) + sqr(HdotY/ay) + NdotH*NdotH ));
+    return 1.0 / (PI * ax*ay * sqr( sqr(HdotX/ax) + sqr(HdotY/ay) + NdotH*NdotH ));
 }
 
 //2012版disney采用的Smith GGX导出的G项，本质是Smith联合遮蔽阴影函数中的“分离的遮蔽阴影型”
@@ -112,13 +130,13 @@ float smithG_GGX(float NdotV, float alphaG)
 {
     float a = alphaG*alphaG;
     float b = NdotV*NdotV;
-    return 1 / (NdotV + sqrt(a + b - a*b));
+    return 1.0 / (NdotV + sqrt(a + b - a*b));
 }
 
 //各向异性版G 
 float smithG_GGX_aniso(float NdotV, float VdotX, float VdotY, float ax, float ay)
 {
-    return 1 / (NdotV + sqrt( sqr(VdotX*ax) + sqr(VdotY*ay) + sqr(NdotV) ));
+    return 1.0 / (NdotV + sqrt( sqr(VdotX*ax) + sqr(VdotY*ay) + sqr(NdotV) ));
 }
 
 vec3 mon2lin(vec3 x)
@@ -126,12 +144,18 @@ vec3 mon2lin(vec3 x)
     return vec3(pow(x[0], 2.2), pow(x[1], 2.2), pow(x[2], 2.2));
 }
 
-vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
+vec3 lightradiance() {
+    float distance = length(uLightPosition.xyz - fragPos);
+    float attenuation = 1.0 / (distance * distance);
+    return uLightColor.rgb * attenuation;
+}
+
+vec3 BRDF( vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
 {
     //准备参数
     float NdotL = dot(N,L);
     float NdotV = dot(N,V);
-    if (NdotL < 0 || NdotV < 0) return vec3(0); //无视水平面以下的光线或视线 
+    if (NdotL < 0.0 || NdotV < 0.0) return vec3(0); //无视水平面以下的光线或视线 
     vec3 H = normalize(L+V);                    //半角向量
     float NdotH = dot(N,H);
     float LdotH = dot(L,H);
@@ -140,7 +164,7 @@ vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
     float Cdlum = .3*Cdlin[0] + .6*Cdlin[1]  + .1*Cdlin[2]; //luminance approx. 近似的将rgb转换成光亮度 luminance 
 
     //对baseColor按亮度归一化，从而独立出色调和饱和度，可以认为Ctint是与亮度无关的固有色调 
-    vec3 Ctint = Cdlum > 0 ? Cdlin/Cdlum : vec3(1); // normalize lum. to isolate hue+sat
+    vec3 Ctint = Cdlum > 0.0 ? Cdlin/Cdlum : vec3(1); // normalize lum. to isolate hue+sat
     //混淆得到高光底色，包含2次mix操作
     //第一次从白色按照用户输入的specularTint插值到Ctint。列如specularTint为0，则返回纯白色
     //第二次从第一次混淆的返回值开始，按照金属度metallic，插值到带有亮度的线性空间baseColor。
@@ -153,7 +177,7 @@ vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
     // Diffuse fresnel - go from 1 at normal incidence to .5 at grazing
     // and mix in diffuse retro-reflection based on roughness
     float FL = SchlickFresnel(NdotL), FV = SchlickFresnel(NdotV); //SchlickFresnel返回的是(1-cosθ)^5的计算结果 
-    float Fd90 = 0.5 + 2 * LdotH*LdotH * roughness; //使用粗糙度计算漫反射的反射率
+    float Fd90 = 0.5 + 2.0 * LdotH*LdotH * roughness; //使用粗糙度计算漫反射的反射率
     float Fd = mix(1.0, Fd90, FL) * mix(1.0, Fd90, FV);  //此步骤还没有乘以baseColor/pi，会在当前代码段之外完成。
 
     //以下代码负责计算SS(次表面散射)分量 
@@ -162,10 +186,10 @@ vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
     // Fss90 used to "flatten" retroreflection based on roughness （Fss90用于“平整”基于粗糙度的逆反射）
     float Fss90 = LdotH*LdotH*roughness; //垂直于次表面的菲涅尔系数
     float Fss = mix(1.0, Fss90, FL) * mix(1.0, Fss90, FV);
-    float ss = 1.25 * (Fss * (1 / (NdotL + NdotV) - .5) + .5); //此步骤同样还没有乘以baseColor/pi，会在当前代码段之外完成。
+    float ss = 1.25 * (Fss * (1.0 / (NdotL + NdotV) - .5) + .5); //此步骤同样还没有乘以baseColor/pi，会在当前代码段之外完成。
 
     // specular
-    float aspect = sqrt(1-anisotropic*.9);//aspect 将艺术家手中的anisotropic参数重映射到[0.1,1]空间，确保aspect不为0,
+    float aspect = sqrt(1.0-anisotropic*.9);//aspect 将艺术家手中的anisotropic参数重映射到[0.1,1]空间，确保aspect不为0,
     float ax = max(.001, sqr(roughness)/aspect);                    //ax随着参数anisotropic的增加而增加
     float ay = max(.001, sqr(roughness)*aspect);                    //ay随着参数anisotropic的增加而减少，ax和ay在anisotropic值为0时相等
     float Ds = GTR2_aniso(NdotH, dot(H, X), dot(H, Y), ax, ay);  //各项异性GTR2导出对应H的法线强度
@@ -189,24 +213,35 @@ vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
     //（漫反射 + 光泽）* 非金属度 + 镜面反射 + 清漆高光
     // 注意漫反射计算时使用了subsurface控制变量对基于菲涅尔的漫反射 和 次表面散射进行插值过渡；此外还补上了之前提到的baseColor/pi
     // 使用非金属度（既：1-金属度）用以消除来自金属的漫反射 <- 非物理，但是能插值很爽啊 
-    return ((1/PI) * mix(Fd, ss, subsurface)*Cdlin + Fsheen) 
-        * (1-metallic)
+    return ((1.0/PI) * mix(Fd, ss, subsurface)*Cdlin + Fsheen) 
+        * (1.0-metallic)
         + Gs*Fs*Ds + .25*clearcoat*Gr*Fr*Dr;
 }
 
 
-void main(){
+
+void main() {
+
+    // 光源位置 
     vec3 light = uLightPosition.xyz;
     // 光源与点线
     vec3 L = normalize(light - fragPos);
+    
+    // 计算半角向量
+    vec3 V = normalize(uViewPosition - fragPos);
+
 
     // 计算法向量转换
-    vec3 N = Normal;
-
-    vec3 V = uViewPosition.xyz;
-
+    vec3 N = texture(uMaterialNormalMap, vTextureCoord).rgb;
+    N = normalize(N * 2.0 - 1.0);
+    N = normalize(TBN * N);
+    // vec3 N = Normal;
     
 
 
-    gl_FragColor = BRDF();
+
+    //fColor = vec4(BRDF(texture(uMaterialDiffuse, vTextureCoord).rgb, L, V, N, tangent, bitangent), 1.0);
+    fColor =  vec4( lightradiance() * BRDF(vec3(0.82, 0.67, 0.16), L, V, N, tangent, bitangent), 1.0);
+    
+    // fColor = texture(uMaterialDiffuse, vTextureCoord) + texture(uMaterialSpecular, vTextureCoord);
 }

@@ -15,10 +15,9 @@ var Cameratheta = 10 / 180 * Math.PI;
 var phi = 0 / 180 * Math.PI;
 
 const engineRender = async () => {
-    light.setPosition(new Vec4(1.0, 1.0, 2.0, 1.0))
+    light.setPosition(new Vec4(1.0, 1.0, 3.0, 1.0))
     light.setAmbient(new Vec4(0.3, 0.3, 0.3))
-    light.setDiffuse(new Vec4(1, 1, 1))
-    light.setSpecular(new Vec4(0.3, 0.3, 0.3))
+    light.setColor(new Vec4(23.47, 21.31, 20.79))
 
     engine.setLight(light)
 
@@ -49,8 +48,10 @@ const engineRender = async () => {
         // e.scene[0].scaleX(0.8)
         // e.scene[0].scaleY(0.8)
         // e.scene[0].scaleZ(0.8)
-        e.scene[0].roateX(theta)
-        // e.scene[0].roateX(theta)
+        e.scene[0].roateX(45)
+        e.scene[0].roateY(45)
+
+
     })
 
 }

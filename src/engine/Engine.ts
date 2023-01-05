@@ -1,7 +1,7 @@
 import { Geometric } from "./Geometric"
 import { Vec4,Vec3, Vec2 } from "./math/Vector"
-import fragString from '../shader/NormalMap.frag.glsl?raw'
-import vertexString from '../shader/NormalMap.vertex.glsl?raw'
+import fragString from '../shader/PBR.frag.glsl?raw'
+import vertexString from '../shader/PBR.vertex.glsl?raw'
 import {Shader} from "./Shader"
 import { Camera } from "./Camera"
 import { Light } from "./Light"
@@ -170,9 +170,10 @@ export default  class Engine {
         this.transformShader = new Shader(this.gl, 
             ['uTheta', 'uTranslate', 'uScale', 
              'uModelView', 'uProject',
-             'uLightAmbient', 'uLightDiffuse', 'uLightSpecular',
+             'uLightAmbient', 'uLightDiffuse', 'uLightSpecular','uLightColor',
              'uLightPosition', 'uShininess', 'uViewPosition',
-             'uMaterialDiffuse','uMaterialSpecular', 'uMaterialNormalMap'
+             'uMaterialDiffuse','uMaterialSpecular', 'uMaterialNormalMap',
+             'metallic', 'subsurface', 'specular', 'roughness', 'specularTint', 'anisotropic', 'sheen', 'sheenTint', 'clearcoat', 'clearcoatGloss'
         ], vertexString, fragString )
 
         this.pipelineSetShaderAttr(this.transformShader, geo) 
@@ -183,13 +184,27 @@ export default  class Engine {
 
 
         // 光照
+        this.transformShader.setUniform4fv('uLightColor', this.light.lightColor )
         this.transformShader.setUniform4fv('uLightAmbient', this.light.lightAmbient )
         this.transformShader.setUniform4fv('uLightDiffuse', this.light.lightDiffuse )
         this.transformShader.setUniform4fv('uLightSpecular', this.light.lightSpecular )
         this.transformShader.setUniform4fv('uLightPosition', this.light.lightPosition)
         
         // 材质
-        this.transformShader.setUniformf('uShininess', geo.material.materialShininess)
+        this.transformShader.setUniformf('uShininess', geo.pbrmaterial.materialShininess)
+        // PBR 材质
+        this.transformShader.setUniformf('metallic', geo.pbrmaterial.metallic)
+        this.transformShader.setUniformf('subsurface', geo.pbrmaterial.subsurface)
+        this.transformShader.setUniformf('specular', geo.pbrmaterial.specular)
+        this.transformShader.setUniformf('roughness', geo.pbrmaterial.roughness)
+        this.transformShader.setUniformf('specularTint', geo.pbrmaterial.specularTint)
+        this.transformShader.setUniformf('sheen', geo.pbrmaterial.sheen)
+        this.transformShader.setUniformf('sheenTint', geo.pbrmaterial.sheenTint)
+        this.transformShader.setUniformf('clearcoat', geo.pbrmaterial.clearcoat)
+        this.transformShader.setUniformf('clearcoatGloss', geo.pbrmaterial.clearcoatGloss)
+
+
+
         
         // 漫反射贴图
         this.gl.activeTexture(this.gl.TEXTURE0)

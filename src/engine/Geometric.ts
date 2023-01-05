@@ -1,4 +1,4 @@
-import { Material } from "./Material";
+import { Material, PBRMaterial } from "./Material";
 import { Vec4, Vec3, Vec2 } from "./math/Vector";
 import { Transform } from "./Tansform";
 
@@ -13,9 +13,14 @@ export class Geometric extends Transform {
     tagents: Vec3[] = []
     bitagents: Vec3[] = []
     material: Material = new Material();
+    pbrmaterial : PBRMaterial = new PBRMaterial();
 
     setMaterial(material: Material) {
         this.material = material
+    }
+
+    setPBRMaterial (material: PBRMaterial) {
+        this.pbrmaterial = material
     }
 }
 

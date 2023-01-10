@@ -213,7 +213,7 @@ export default  class Engine {
         
         // 漫反射贴图
         this.gl.activeTexture(this.gl.TEXTURE0)
-        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.material.matrialDiffuseTexture.texture)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.pbrmaterial.matrialDiffuseTexture.texture)
         this.transformShader.setUniformi('uMaterialDiffuse', 0)
 
         // 镜面反色贴图
@@ -223,7 +223,7 @@ export default  class Engine {
 
         // 法向贴图
         this.gl.activeTexture(this.gl.TEXTURE1)
-        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.material.normalMap.texture)
+        this.gl.bindTexture(this.gl.TEXTURE_2D, geo.pbrmaterial.normalMap.texture)
         this.transformShader.setUniformi('uMaterialNormalMap', 1)
     
     }
@@ -246,8 +246,11 @@ export default  class Engine {
             this.gl.drawArrays(this.gl.TRIANGLES, 0 , 36)
         })
 
-        
         requestAnimationFrame(this.pipelineRender.bind(this, callback));
 
+    }
+
+    clear() {
+        this.scene = []
     }
 }

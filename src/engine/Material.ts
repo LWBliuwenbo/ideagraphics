@@ -1,4 +1,3 @@
-import { Vec4 } from "./math/Vector";
 import { Texture } from "./Texture";
 export class Material {
 
@@ -57,4 +56,20 @@ export class PBRMaterial extends Material{
 // 清漆光泽度，控制透明涂层的高光强度（光泽度）
 // 规定缎面(satin)为0，光泽(gloss)为1； 0 1 1
  clearcoatGloss:number = 0;
+
+
+ setProps(material: PBRMaterial) {
+    this.metallic = material.metallic;
+    this.subsurface = material.subsurface;
+    this.specular = material.specular;
+    this.roughness = material.roughness;
+    this.specularTint = material.specularTint;
+    this.anisotropic = material.anisotropic;
+    this.sheen = material.sheen;
+    this.sheenTint = material.sheenTint;
+    this.clearcoat = material.clearcoat;
+    this.clearcoatGloss = material.clearcoatGloss
+ }
+
+
 }

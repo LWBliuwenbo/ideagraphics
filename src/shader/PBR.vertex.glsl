@@ -14,9 +14,6 @@ out vec3 tangent;
 out vec3 bitangent;
 out mat3 TBN;
 
-
-uniform vec4 uLightPosition;
-
 // 模型变换矩阵
 uniform vec3 uTheta;
 uniform vec3 uTranslate;

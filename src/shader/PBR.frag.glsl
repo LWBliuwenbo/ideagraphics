@@ -17,12 +17,24 @@ in vec3 radiance; // 光照辐射度
 // uniform vec4 uLightDiffuse;
 // uniform vec4 uLightSpecular; 
 
-uniform vec4 uLightColor;
+uniform vec3 uLightColor;
 
-// 光源位置
-uniform vec4 uLightPosition;
+// 光源：类型
+uniform int uLightType;
+
+// 光源：位置
+uniform vec3 uLightPosition;
+
+// 光源：强度
+uniform float uLightItensity;
+
+// 光源：衰减半径
+
+uniform float ulightInvRadius;
+
 // 眼睛位置
 uniform vec3 uViewPosition;
+
 // 高光
 uniform float uShininess;
 
@@ -150,6 +162,7 @@ vec3 lightradiance() {
     return uLightColor.rgb * attenuation;
 }
 
+
 vec3 BRDF( vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
 {
     //准备参数
@@ -218,16 +231,61 @@ vec3 BRDF( vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
         + Gs*Fs*Ds + .25*clearcoat*Gr*Fr*Dr;
 }
 
+// 平行光
+vec3 light_direct_luminance (vec3 baseColor, vec3 V, vec3 N, vec3 X, vec3 Y) {
+      // 光源位置 
+    vec3 light = uLightPosition.xyz;
+    // 光源与点线
+    vec3 L = normalize(light);
+
+    float NoL = clamp(dot(N, L), 0.0, 1.0);
+
+    // lightIntensity为垂直入射时的照度, 单位 lux
+    float illuminance = (uLightItensity / 683.0 ) * NoL;
+
+    return BRDF(baseColor, L,V,N, X, Y) * illuminance;
+}
+
+// 点光源：计算衰减
+float getSquareFalloffAttenuation(vec3 posToLight, float lightInvRadius) {
+    float distanceSquare = dot(posToLight, posToLight);
+    float factor = distanceSquare * lightInvRadius * lightInvRadius;
+    float smoothFactor = max(1.0 - factor * factor, 0.0);
+    return (smoothFactor * smoothFactor) / max(distanceSquare, 1e-4);
+}
+
+
+
+
+
+// 点光源
+vec3 light_point_luminance(vec3 baseColor, vec3 V, vec3 N, vec3 X, vec3 Y) {
+
+     // 光源位置 
+    vec3 light = uLightPosition.xyz;
+
+    vec3 posToLight = light - fragPos;
+    // 光源与点线
+    vec3 L = normalize(posToLight);
+
+    float NoL = clamp(dot(N, L), 0.0, 1.0);
+
+    float attenuation;
+
+    attenuation  = getSquareFalloffAttenuation(posToLight, ulightInvRadius);
+    //TODO 聚光灯衰减计算
+
+    // lightIntensity为垂直入射时的照度, 单位 w/m*m
+    float illuminance = uLightItensity *attenuation* NoL;
+
+    return BRDF(baseColor, L,V,N, X, Y) * illuminance * uLightColor;
+}
 
 
 void main() {
 
-    // 光源位置 
-    vec3 light = uLightPosition.xyz;
-    // 光源与点线
-    vec3 L = normalize(light - fragPos);
     
-    // 计算半角向量
+    // 视线方向
     vec3 V = normalize(uViewPosition - fragPos);
 
 
@@ -235,13 +293,12 @@ void main() {
     vec3 N = texture(uMaterialNormalMap, vTextureCoord).rgb;
     N = normalize(N * 2.0 - 1.0);
     N = normalize(TBN * N);
-    // vec3 N = Normal;
-    
 
-
-
-    //fColor = vec4(BRDF(texture(uMaterialDiffuse, vTextureCoord).rgb, L, V, N, tangent, bitangent), 1.0);
-    fColor =  vec4( lightradiance() * BRDF(vec3(0.82, 0.67, 0.16), L, V, N, tangent, bitangent), 1.0);
-    
-    // fColor = texture(uMaterialDiffuse, vTextureCoord) + texture(uMaterialSpecular, vTextureCoord);
+    vec3 baseColor = texture(uMaterialDiffuse, vTextureCoord).rgb;
+    // vec3 baseColor = vec3(0.75f, 0.86f, 0.34f);
+    if(uLightType == 1){
+        fColor =  vec4( light_point_luminance(baseColor,  V, N, tangent, bitangent), 1.0);
+    }else if(uLightType == 0){
+        fColor =  vec4( light_direct_luminance(baseColor,  V, N, tangent, bitangent), 1.0);
+    }
 }

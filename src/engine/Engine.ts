@@ -4,7 +4,7 @@ import fragString from '../shader/PBR.frag.glsl?raw'
 import vertexString from '../shader/PBR.vertex.glsl?raw'
 import {Shader} from "./Shader"
 import { Camera } from "./Camera"
-import { Light } from "./Light"
+import { Light, PbrLight } from "./Light"
 
 
 export default  class Engine {
@@ -13,7 +13,7 @@ export default  class Engine {
     canvas : HTMLCanvasElement
     scene: Geometric[]
     camera: Camera
-    light: Light
+    light: PbrLight
     theta: number[] = [0,0,0]
     thetaLoc: WebGLUniformLocation | null
     shaders: Shader[]
@@ -45,7 +45,7 @@ export default  class Engine {
         this.shaders = []
         this.transformShader = null
         this.camera = new Camera();
-        this.light = new Light();
+        this.light = new PbrLight();
     }
 
 
@@ -102,7 +102,7 @@ export default  class Engine {
     setCamera(camera: Camera) {
         this.camera = camera;
     }
-    setLight(light: Light) {
+    setLight(light: PbrLight) {
         this.light = light;
     }
 
@@ -171,7 +171,7 @@ export default  class Engine {
             ['uTheta', 'uTranslate', 'uScale', 
              'uModelView', 'uProject',
              'uLightAmbient', 'uLightDiffuse', 'uLightSpecular','uLightColor',
-             'uLightPosition', 'uShininess', 'uViewPosition',
+             'uLightPosition', 'uShininess', 'uViewPosition', 'uLightType','uLightItensity','ulightInvRadius',
              'uMaterialDiffuse','uMaterialSpecular', 'uMaterialNormalMap',
              'metallic', 'subsurface', 'specular', 'roughness', 'specularTint', 'anisotropic', 'sheen', 'sheenTint', 'clearcoat', 'clearcoatGloss'
         ], vertexString, fragString )
@@ -184,11 +184,16 @@ export default  class Engine {
 
 
         // 光照
-        this.transformShader.setUniform4fv('uLightColor', this.light.lightColor )
-        this.transformShader.setUniform4fv('uLightAmbient', this.light.lightAmbient )
-        this.transformShader.setUniform4fv('uLightDiffuse', this.light.lightDiffuse )
-        this.transformShader.setUniform4fv('uLightSpecular', this.light.lightSpecular )
-        this.transformShader.setUniform4fv('uLightPosition', this.light.lightPosition)
+        // this.transformShader.setUniform4fv('uLightColor', this.light.lightColor )
+        // this.transformShader.setUniform4fv('uLightAmbient', this.light.lightAmbient )
+        // this.transformShader.setUniform4fv('uLightDiffuse', this.light.lightDiffuse )
+        // this.transformShader.setUniform4fv('uLightSpecular', this.light.lightSpecular )
+        // this.transformShader.setUniform4fv('uLightPosition', this.light.lightPosition)
+         this.transformShader.setUniform3fv('uLightPosition', this.light.position)
+         this.transformShader.setUniformi('uLightType', this.light.type)
+         this.transformShader.setUniformf('uLightItensity', this.light.itensity)
+         this.transformShader.setUniformf('ulightInvRadius', this.light.falloffradius)
+         this.transformShader.setUniform3fv('uLightColor', this.light.color)
         
         // 材质
         this.transformShader.setUniformf('uShininess', geo.pbrmaterial.materialShininess)

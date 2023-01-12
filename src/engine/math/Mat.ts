@@ -1,3 +1,4 @@
+import { Vec3 } from "./Vector";
 
 
 export class Mat4 {
@@ -43,11 +44,24 @@ export class Mat4 {
 
     mult(mat4: Mat4): Mat4 {
         const result: number[][] = []
-        for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) {
+        for (let i = 0; i < this.out.length; i++) for (let j = 0; j < mat4.out.length; j++) {
+            if(result[i] == undefined){
+                result[i] = []
+            }
             result[i][j] = 0.0;
             for (var k = 0; k < 4; k++) result[i][j] += this.out[i][k] * mat4.out[k][j];
         }
         return new Mat4(result)
+    }
+
+    static multVe3(vec3: Vec3, mat:Mat4) { 
+        const {x, y, z} = vec3
+        const mat4 = mat.out;
+      return new Vec3(
+        x* mat4[0][0] + y*mat4[1][0] + z * mat4[2][0] + mat4[3][0],
+        x* mat4[0][1] + y*mat4[1][1] + z * mat4[2][1] + mat4[3][1],
+        x* mat4[0][2] + y*mat4[1][2] + z * mat4[2][2] + mat4[3][2],
+      )
     }
 
 }

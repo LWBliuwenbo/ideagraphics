@@ -148,15 +148,27 @@ export class Vec3 {
         return new Vec3(x* n , y* n, z*n)
     }
 
+    toRgb() {
+        const {x, y, z} = this;
+        const r = x / 1 * 255;
+        const g = y / 1 * 255;
+        const b = z / 1 * 255;
+        return `rgb(${r},${g},${b})`
+    }
 
+    static rgbToVec3(rgb:string) {
+        const rgbstring = rgb.replace('rgb(', '').replace(')','');
+        const rgbarray = rgbstring.split(',')
+        if(rgbarray.length === 3){
+            const x = Number.parseFloat(rgbarray[0]) /255;
+            const y = Number.parseFloat(rgbarray[1]) /255;
+            const z = Number.parseFloat(rgbarray[2]) /255;
 
-
-
-
-
-    
-
-
+            return new Vec3(x,y,z);
+        }{
+            return new Vec3(0,0,0);
+        }
+    }
 
 }
 

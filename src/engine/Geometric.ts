@@ -195,8 +195,6 @@ export class Cube extends Geometric {
             const index2 = index_of_quad_start + 1;
             const index3 = index_of_quad_start + 2;
 
-            console.log(index1, index2, index3)
-
 
             let pos1:Vec3; let pos2: Vec3; let pos3: Vec3;
             let uv1:Vec2; let uv2: Vec2; let uv3: Vec2;
@@ -240,4 +238,8 @@ export class Cube extends Geometric {
         this.bitagents = bitagents;
     }
 
+}
+
+export class Ball extends Geometric {
+    
 }

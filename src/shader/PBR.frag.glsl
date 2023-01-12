@@ -243,7 +243,7 @@ vec3 light_direct_luminance (vec3 baseColor, vec3 V, vec3 N, vec3 X, vec3 Y) {
     // lightIntensity为垂直入射时的照度, 单位 lux
     float illuminance = (uLightItensity / 683.0 ) * NoL;
 
-    return BRDF(baseColor, L,V,N, X, Y) * illuminance;
+    return vec3(0.3) +  BRDF(baseColor, L,V,N, X, Y) * illuminance;
 }
 
 // 点光源：计算衰减
@@ -278,7 +278,7 @@ vec3 light_point_luminance(vec3 baseColor, vec3 V, vec3 N, vec3 X, vec3 Y) {
     // lightIntensity为垂直入射时的照度, 单位 w/m*m
     float illuminance = uLightItensity *attenuation* NoL;
 
-    return BRDF(baseColor, L,V,N, X, Y) * illuminance * uLightColor;
+    return vec3(0.03) + BRDF(baseColor, L,V,N, X, Y) * illuminance * uLightColor;
 }
 
 
@@ -290,15 +290,22 @@ void main() {
 
 
     // 计算法向量转换
-    vec3 N = texture(uMaterialNormalMap, vTextureCoord).rgb;
-    N = normalize(N * 2.0 - 1.0);
-    N = normalize(TBN * N);
+    vec3 N = normalize(Normal);
 
-    vec3 baseColor = texture(uMaterialDiffuse, vTextureCoord).rgb;
-    // vec3 baseColor = vec3(0.75f, 0.86f, 0.34f);
+    vec3 L = normalize(uLightPosition - fragPos);
+    vec3 X = normalize(tangent);
+    vec3 Y = normalize(bitangent);
+
+    vec3 baseColor = vec3(0.87f, 0.85f, 0.76f);
+    vec3 b ;
     if(uLightType == 1){
-        fColor =  vec4( light_point_luminance(baseColor,  V, N, tangent, bitangent), 1.0);
+        b =  vec3(  BRDF(baseColor, L, V, N, X, Y));
     }else if(uLightType == 0){
-        fColor =  vec4( light_direct_luminance(baseColor,  V, N, tangent, bitangent), 1.0);
+        b =  vec3( BRDF(baseColor,L,  V, N, X, Y));
     }
+
+    b = max(b, vec3(0.0));
+    b*= dot(L, N);
+
+    fColor = vec4(b, 1.0);
 }

@@ -6,6 +6,11 @@ import { Vec3, Vec4 } from "./math/Vector";
 export class Camera {
 
     viewPosition:Vec3 = new Vec3();
+
+    at : Vec3 = new Vec3();
+
+    up: Vec3 = new Vec3();
+
     // 模视变换矩阵 
     modelViewMatrix: Mat4 = new Mat4([])
     // 投影变换矩阵
@@ -24,6 +29,12 @@ export class Camera {
      * v[x] v[y] v[z]  -a·v
      * 0    0    0     1.0
      */
+
+    setViewPosition(pos: Vec3) {
+        this.viewPosition = pos;
+        this.lookAt(pos, this.at, this.up)
+    }
+
     lookAt(eye: Vec3, at: Vec3, up: Vec3 ) {
         const  v = at.sub(eye).normalize();
         const n = v.cross(up).normalize();
@@ -37,6 +48,8 @@ export class Camera {
         ])
 
         this.viewPosition = eye;
+        this.up = up;
+        this.at = at;
 
         return this;
     }

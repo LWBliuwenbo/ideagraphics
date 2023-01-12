@@ -48,6 +48,12 @@ export class PbrLight {
     falloffradius: number = 0
     color:Vec3 = new  Vec3(1,1,1)
 
+    setProps(light: PbrLight) {
+        this.type = light.type;
+        this.position = light.position;
+        this.color = light.color
+        this.itensity = light.itensity;
+    }
 }
 
 
@@ -58,7 +64,7 @@ export const LIGHT_TYPE_DOT = 1;
 export class DirectionalLight extends PbrLight {
     type = LIGHT_TYPE_DIRECTIONAL
 
-    position:Vec3 = new Vec3(0, 0, 3)
+    position:Vec3 = new Vec3(2, 2, 2)
 
     color:Vec3 = new  Vec3(1,1,1)
 
@@ -70,7 +76,7 @@ export class DotLight extends PbrLight {
 
     type = LIGHT_TYPE_DOT
     
-    position:Vec3 = new Vec3(0, 0, 3)
+    position:Vec3 = new Vec3(3, 3, 3)
     
     itensity:number = 100
 

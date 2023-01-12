@@ -5,7 +5,7 @@ import vertexString from '../shader/PBR.vertex.glsl?raw'
 import {Shader} from "./Shader"
 import { Camera } from "./Camera"
 import { Light, PbrLight } from "./Light"
-
+import { EventSystem } from './EventSystem'
 
 export default  class Engine {
     
@@ -18,6 +18,7 @@ export default  class Engine {
     thetaLoc: WebGLUniformLocation | null
     shaders: Shader[]
     transformShader: Shader | null
+    eventSystem:EventSystem
 
 
     constructor(id: string) {
@@ -46,8 +47,15 @@ export default  class Engine {
         this.transformShader = null
         this.camera = new Camera();
         this.light = new PbrLight();
+        this.eventSystem = new EventSystem(this);
     }
 
+    enableMouseMove() {
+        this.eventSystem.addMoveEventListener();
+    }
+    disableMouseMove() {
+        this.eventSystem.removeMoveEventListener();
+    }
 
     addGeo(geo: Geometric){
         this.scene.push(geo)
@@ -178,9 +186,8 @@ export default  class Engine {
 
         this.pipelineSetShaderAttr(this.transformShader, geo) 
         // 模视 和 投影变换
-        this.transformShader.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
-        this.transformShader.setUniformMat4fv('uProject', this.camera.projectionMatrix)
-        this.transformShader.setUniform3fv('uViewPosition', this.camera.viewPosition)
+
+        
 
 
         // 光照
@@ -236,7 +243,9 @@ export default  class Engine {
         }
     }
     pipelineRender(callback?:(engine: Engine )=> void ) {
-
+        this.transformShader?.setUniform3fv('uViewPosition', this.camera.viewPosition)
+        this.transformShader?.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
+        this.transformShader?.setUniformMat4fv('uProject', this.camera.projectionMatrix)
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
         callback && callback(this);

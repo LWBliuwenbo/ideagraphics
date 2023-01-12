@@ -87,8 +87,6 @@ const materialSchemaJson = {
             description: '清漆光泽度',
             remark: '控制透明涂层的高光强度（光泽度）,规定缎面(satin)为0，光泽(gloss)为1'
         },
-
-
     }
 
 }

@@ -5,7 +5,7 @@ export class Texture {
     texture: WebGLTexture | null = null;
 
     static createTexture(gl: WebGL2RenderingContext, imageUrl: string) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
 
             const image = new Image();
             const result = new Texture();

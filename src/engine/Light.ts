@@ -41,7 +41,7 @@ export class Light {
 
 }
 
-export class PbrLight {
+export class PbrLight extends Light {
     type: number = -1
     position: Vec3 = new Vec3(0, 0, 1)
     itensity:number = 25000

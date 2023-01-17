@@ -1,7 +1,7 @@
 // 观察
 
 import { Mat4 } from "./math/Mat";
-import { Vec3, Vec4 } from "./math/Vector";
+import { Vec3 } from "./math/Vector";
 
 export class Camera {
 
@@ -109,6 +109,36 @@ export class Camera {
 
 
 
+    roateViewX(deg:number) {
+        const PI = 3.1415926;
+        const angle = deg * PI / (180);
+        const c = Math.cos(angle)
+        const s = Math.sin(angle);
+        // 绕x 轴旋转
+        this.setViewPosition(Mat4.multVe3(this.viewPosition, 
+            new Mat4([
+                1.0,  0.0,  0.0, 0.0,
+                0.0,  c,  s, 0.0,
+                0.0, -s,  c, 0.0,
+                0.0,  0.0,  0.0, 1.0
+            ])))
+    }
+
+    roateViewY(deg:number) {
+        const PI = 3.1415926;
+        const angle = deg * PI / (180);
+        const c = Math.cos(angle)
+        const s = Math.sin(angle);
+        // 绕x 轴旋转
+        this.setViewPosition( Mat4.multVe3(this.viewPosition, 
+            new Mat4([
+                c, 0.0, -s, 0.0,
+                0.0, 1.0,  0.0, 0.0,
+                s, 0.0,  c, 0.0,
+                0.0, 0.0,  0.0, 1.0
+            ])))
+
+    }
 
 
 

@@ -4,23 +4,44 @@ import fragString from '../shader/PBR.frag.glsl?raw'
 import vertexString from '../shader/PBR.vertex.glsl?raw'
 import {Shader} from "./Shader"
 import { Camera } from "./Camera"
-import { Light, PbrLight } from "./Light"
+import {  PbrLight } from "./Light"
 import { EventSystem } from './EventSystem'
 
+/**
+ * 引擎类: 用于实例化化图形引擎
+ * 可以设置 Light, Camera, 为Scene 添加Mesh 开启事件监听
+ */
+
 export default  class Engine {
-    
+    /** webgl 上下文，根据初始化canvas获取 */
     gl : WebGL2RenderingContext
+
+    /** canvas 引擎初始化的画布 */
     canvas : HTMLCanvasElement
+
+    /** scene 场景 */
     scene: Geometric[]
+
+    /** camera 摄像机 */
     camera: Camera
+
+    /** light 光照 */
     light: PbrLight
-    theta: number[] = [0,0,0]
-    thetaLoc: WebGLUniformLocation | null
-    shaders: Shader[]
+
+    /** 基础着色器 */
     transformShader: Shader | null
+    
+    /** 事件系统 */
     eventSystem:EventSystem
 
+    /** 渲染循环ID */
+    animateid:number| null
 
+    /**
+     * Engine 构造器
+     *
+     * @param id 引擎初始画布元素 id
+     */
     constructor(id: string) {
         const el = document.getElementById(id)
 
@@ -42,28 +63,31 @@ export default  class Engine {
         
         this.gl = gl;
         this.scene = []
-        this.thetaLoc = null
-        this.shaders = []
         this.transformShader = null
         this.camera = new Camera();
         this.light = new PbrLight();
         this.eventSystem = new EventSystem(this);
+        this.animateid = null;
     }
-
-    enableMouseMove() {
-        this.eventSystem.addMoveEventListener();
+    /** 
+     *  添加鼠标移动监听
+     * @param callback 监听回调函数
+    */
+    addMouseMoveListener(callback:(degx: number, degy: number)=> void) {
+        this.eventSystem.addMoveEventListener(callback);
     }
-    disableMouseMove() {
+    /**
+     *  移除鼠标移动监听
+     */
+    removeMouseMoveListener() {
         this.eventSystem.removeMoveEventListener();
     }
 
+    /** 添加Mesh */
     addGeo(geo: Geometric){
         this.scene.push(geo)
     }
 
-    addShader( uniforms: string[], vertexShader?: string, fragmentShader?: string) {
-        this.shaders.push( new Shader( this.gl, uniforms, vertexShader, fragmentShader))
-    }
 
     flatten(vecs : Vec4[]) {
         const buffer =  new Float32Array(vecs.length * 4)
@@ -98,28 +122,21 @@ export default  class Engine {
         return buffer
     }
 
-    pipelineInit() {
-        this.scene.forEach((geo)=> {
-            this.pipelineTransformShaderInit(geo);
-            this.shaders.forEach((shader)=> {
-                this.pipelineSetShaderAttr(shader, geo)
-            })
-        })
-    }
-
+    /**设置 摄像机 */
     setCamera(camera: Camera) {
         this.camera = camera;
     }
+    /**设置 光照 */
     setLight(light: PbrLight) {
         this.light = light;
     }
-
+    /**引擎管线：设置着色器属性 */
     pipelineSetShaderAttr(shader: Shader, geo: Geometric) {
 
         const {gl} = this;
         gl.useProgram(shader.program);
 
-        // 法向量
+        //法向量
         const nBuf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, nBuf);
         gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.normals), gl.STATIC_DRAW)
@@ -140,13 +157,14 @@ export default  class Engine {
         // 顶点位置
         const vBuf = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vBuf);
-        gl.bufferData(gl.ARRAY_BUFFER,  this.flatten(geo.positions), gl.STATIC_DRAW)
+        gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.positions), gl.STATIC_DRAW)
 
         const pLoc = gl.getAttribLocation(shader.program, "aPosition");
-        gl.vertexAttribPointer(pLoc, 4, gl.FLOAT, false, 0, 0)
+        gl.vertexAttribPointer(pLoc, 3, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(pLoc)
 
-        // 纹理坐标
+
+        //纹理坐标
         const textureBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, textureBuffer);
         gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV2(geo.textureCoords), gl.STATIC_DRAW) 
@@ -155,7 +173,7 @@ export default  class Engine {
         gl.vertexAttribPointer(textureLoc, 2, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(textureLoc)
 
-        // 法相切线
+        //法相切线
         const tangentBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, tangentBuffer);
         gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.tagents), gl.STATIC_DRAW) 
@@ -164,7 +182,7 @@ export default  class Engine {
         gl.vertexAttribPointer(tanagentLoc, 3, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(tanagentLoc)
 
-        // 次切线
+        //次切线
         const bitanBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, bitanBuffer);
         gl.bufferData(gl.ARRAY_BUFFER,  this.flattenV3(geo.bitagents), gl.STATIC_DRAW) 
@@ -172,8 +190,15 @@ export default  class Engine {
         const bitanLoc = gl.getAttribLocation(shader.program, "aBitangent");
         gl.vertexAttribPointer(bitanLoc, 3, gl.FLOAT, false, 0, 0)
         gl.enableVertexAttribArray(bitanLoc)
+        
+        if(geo.indices.length > 0){
+            const elementBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, elementBuffer);
+            gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(geo.indices), gl.STATIC_DRAW);
+        }
 
     }
+    /**引擎管线：初始化着色器 */
     pipelineTransformShaderInit(geo: Geometric) {
         this.transformShader = new Shader(this.gl, 
             ['uTheta', 'uTranslate', 'uScale', 
@@ -191,10 +216,10 @@ export default  class Engine {
 
 
         // 光照
-        // this.transformShader.setUniform4fv('uLightColor', this.light.lightColor )
-        // this.transformShader.setUniform4fv('uLightAmbient', this.light.lightAmbient )
-        // this.transformShader.setUniform4fv('uLightDiffuse', this.light.lightDiffuse )
-        // this.transformShader.setUniform4fv('uLightSpecular', this.light.lightSpecular )
+        this.transformShader.setUniform4fv('uLightColor', this.light.lightColor )
+        this.transformShader.setUniform4fv('uLightAmbient', this.light.lightAmbient )
+        this.transformShader.setUniform4fv('uLightDiffuse', this.light.lightDiffuse )
+        this.transformShader.setUniform4fv('uLightSpecular', this.light.lightSpecular )
         // this.transformShader.setUniform4fv('uLightPosition', this.light.lightPosition)
          this.transformShader.setUniform3fv('uLightPosition', this.light.position)
          this.transformShader.setUniformi('uLightType', this.light.type)
@@ -234,32 +259,41 @@ export default  class Engine {
         this.transformShader.setUniformi('uMaterialNormalMap', 1)
     
     }
-
+    /**引擎管线：设置基础着色器通用变量 */
     pipelineTransformRender(geo: Geometric) {
         if(this.transformShader){
             this.transformShader.setUniform3fv('uTheta', geo.roateTheta)
             this.transformShader.setUniform3fv('uTranslate', geo.tranlate)
             this.transformShader.setUniform3fv('uScale', geo.scale)
+            this.transformShader?.setUniform3fv('uViewPosition', this.camera.viewPosition)
+            this.transformShader?.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
+            this.transformShader?.setUniformMat4fv('uProject', this.camera.projectionMatrix)
         }
     }
-    pipelineRender(callback?:(engine: Engine )=> void ) {
-        this.transformShader?.setUniform3fv('uViewPosition', this.camera.viewPosition)
-        this.transformShader?.setUniformMat4fv('uModelView', this.camera.modelViewMatrix)
-        this.transformShader?.setUniformMat4fv('uProject', this.camera.projectionMatrix)
+    /**引擎管线：渲染函数 */
+    pipelineRender( ) {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-        callback && callback(this);
-
         this.scene.forEach((geo)=> {
+            this.pipelineTransformShaderInit(geo);
             this.pipelineTransformRender(geo)
-            this.gl.drawArrays(this.gl.TRIANGLES, 0 , 36)
+            geo.draw(this.gl)
         })
 
-        requestAnimationFrame(this.pipelineRender.bind(this, callback));
+
+       this.animateid = requestAnimationFrame(this.pipelineRender.bind(this))
+
 
     }
-
+    /**引擎管线：清除动画 */
+    clearAnimate() {
+        if(this.animateid){
+            window.cancelAnimationFrame(this.animateid)
+        }
+    }
+    /**引擎管线：清除场景和动画 */
     clear() {
         this.scene = []
+        this.clearAnimate();
     }
 }

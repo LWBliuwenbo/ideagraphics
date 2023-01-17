@@ -31,7 +31,7 @@ export class Shader {
        this.uniforms.forEach((uniform) => {
             const loc = this.gl.getUniformLocation(this.program, uniform)
             if (loc === null) {
-                return new Error("Shader获取 uniform" + uniform + '错误')
+                return
             }
             this.uniformLocs[uniform] = loc;
         })

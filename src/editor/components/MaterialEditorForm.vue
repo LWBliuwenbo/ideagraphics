@@ -46,7 +46,7 @@ const materialSchemaJson = {
 
         specular: {
             type: 'number',
-            description: '次表面',
+            description: '高光强度',
             remark: '高光强度（镜面反射强度）,控制镜面反射光占入射光的比率，用于取代折射率'
         },
 

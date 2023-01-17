@@ -305,7 +305,7 @@ void main() {
     }
 
     b = max(b, vec3(0.0));
-    b*= dot(L, N);
+    b*= dot(L, N) + vec3(0.2);
 
     fColor = vec4(b, 1.0);
 }

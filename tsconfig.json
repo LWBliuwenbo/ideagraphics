@@ -13,7 +13,12 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "types": ["element-plus/global"],
+    "paths": {
+      "@/*": ["./src/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src","src/editor"],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -1,43 +1,44 @@
+import { Vec3 } from "./math/Vector"
 
 
 export class Transform{
     // roateMat: Mat4 
-    roateTheta: number[] = [0,0,0]
-    tranlate: number[] = [0,0,0]
-    scale: number[] = [1,1,1]
+    roateTheta: Vec3= new Vec3(0,0,0)
+    tranlate: Vec3 =  new Vec3(0,0,0)
+    scale: Vec3 =  new Vec3(1,1,1)
 
 
     roateX(deg: number) {
-        this.roateTheta[0] = deg
+        this.roateTheta.x = deg
     }
 
     roateY(deg: number) {
-        this.roateTheta[1] = deg
+        this.roateTheta.y = deg
     }
 
     roateZ(deg: number) {
-        this.roateTheta[2] = deg
+        this.roateTheta.z = deg
     }
 
     tranlateX(distance: number){
-        this.tranlate[0] = distance
+        this.tranlate.x = distance
     }
     tranlateY(distance: number){
-        this.tranlate[1] = distance
+        this.tranlate.y = distance
     }
 
     tranlateZ(distance: number){
-        this.tranlate[2] = distance
+        this.tranlate.z = distance
     }
 
     scaleX(distance: number){
-        this.scale[0] = distance
+        this.scale.x = distance
     }
     scaleY(distance: number){
-        this.scale[1] = distance
+        this.scale.y = distance
     }
 
     scaleZ(distance: number){
-        this.scale[2] = distance
+        this.scale.z = distance
     }
 }

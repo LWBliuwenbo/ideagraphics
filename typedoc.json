@@ -1,0 +1,10 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": ["./src/engine/index.ts"],
+    "exclude": ["./src/main.ts"],
+    "tsconfig": "tsconfig.json",
+    "out": "./doc",
+    "plugin": ["typedoc-plugin-markdown"],
+    "name": "IdeaGraphics",
+    "githubPages": false
+}

@@ -1,5 +1,5 @@
 import { Mat4 } from "./math/Mat"
-import { Vec4 } from "./math/Vector"
+import { Vec3,Vec4 } from "./math/Vector"
 
 export class Shader {
     uniforms: string[]
@@ -15,11 +15,14 @@ export class Shader {
     setUniformf(uniform: string, value: number) {
         this.gl.uniform1f(this.uniformLocs[uniform], value)
     }
-    setUniform3fv(uniform: string, value: Float32List) {
-        this.gl.uniform3fv(this.uniformLocs[uniform], value)
+    setUniform3fv(uniform: string, value: Vec3) {
+        this.gl.uniform3fv(this.uniformLocs[uniform], value.flattrn())
     }
     setUniform4fv(uniform: string, value: Vec4) {
         this.gl.uniform4fv(this.uniformLocs[uniform], value.flattrn())
+    }
+    setUniformi(uniform: string, i: number) {
+        this.gl.uniform1i(this.uniformLocs[uniform], i)
     }
     setUniformMat4fv(uniform:string, mat4: Mat4 ) {
         this.gl.uniformMatrix4fv(this.uniformLocs[uniform], false, mat4.flattrn());
@@ -28,7 +31,7 @@ export class Shader {
        this.uniforms.forEach((uniform) => {
             const loc = this.gl.getUniformLocation(this.program, uniform)
             if (loc === null) {
-                return new Error("Shader获取 uniform" + uniform + '错误')
+                return
             }
             this.uniformLocs[uniform] = loc;
         })

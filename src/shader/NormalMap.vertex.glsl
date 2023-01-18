@@ -1,14 +1,18 @@
 #version 300 es
 
 in  vec4 aPosition; // 顶点位置
-in  vec4 aColor; // 顶点颜色
 in  vec3 aNormal; // 法向量
 in  vec2 aTextureCoord; // 纹理坐标
-out vec4 vColor; // 输出顶点颜色
-out vec2 vTextureCoord; // 输出纹理坐标
+in  vec3 aTangent;
+in  vec3 aBitangent;
 
+
+out vec2 vTextureCoord; // 输出纹理坐标
 out vec3 fragPos;
 out vec3 Normal;
+out vec3 tangent;
+out vec3 bitangent;
+out mat3 TBN;
 
 
 // 模型变换矩阵
@@ -69,10 +73,14 @@ void main()
 
     fragPos = ( model * aPosition).xyz;
     // 计算法向量转换
-    Normal = mat3(transpose(inverse( model))) * aNormal;
+    mat3 NormalMat = mat3(transpose(inverse( model)));
 
 
     vTextureCoord = aTextureCoord;
+    tangent = NormalMat * aTangent;
+    bitangent = NormalMat * aBitangent;
+    Normal = NormalMat * aNormal;
+    TBN = transpose(mat3(tangent, bitangent, Normal));
     
     gl_Position = uProject * uModelView * model * aPosition;
 

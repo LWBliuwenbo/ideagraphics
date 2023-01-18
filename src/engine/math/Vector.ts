@@ -1,23 +1,72 @@
 export class Vec2 {
-    out = new Array<number>(2)
+    x:number = 0.0
+    y:number = 0.0
     type = "vec2"
 
-    constructor(arg1: number[]);
+    constructor(x: number, y: number);
     constructor(arg2: Vec2);
     constructor();
 
 
 
-    constructor( arg?: any) {
-        if(arg === undefined){
-            this.out = [0.0, 0.0]
-        }else if(arg.type === 'vec2'){
-            this.out = [...arg.out];
+    constructor( arg1?: any, arg2?:any) {
+        if(arg1 === undefined){
+        
+        }else if(arg1.type === 'vec2'){
+            this.x = arg1.x
+            this.y = arg1.y
         }else {
-            this.out[0] = arg[0]
-            this.out[1] = arg[1]
+            this.x = arg1
+            this.y = arg2
         }
     }
+
+    burden() {
+        const {x, y} = this;
+        return new Vec2(-x, -y )
+    }
+
+    add(v: Vec2) {
+        const {x, y} = this;
+        return new Vec2(x+v.x, y+v.y)
+    }
+
+    sub(v: Vec2) {
+        const {x, y} = this;
+        return new Vec2(x-v.x, y-v.y)
+    }
+
+    normalize():Vec2{
+        const {x, y} = this;
+
+        const magsql = Math.sqrt(x*x + y*y)
+        if(magsql == 0){
+            return this
+        }
+        const overmag = 1.0 / magsql;
+        return new Vec2(x*overmag, y*overmag)
+    }
+    dot(v: Vec2) {
+        const {x, y}  = this;
+        return x* v.x + y* v.y
+    }
+
+    mag() {
+        const {x, y} = this;
+
+        return Math.sqrt(x*x + y*y)
+    }
+
+    cross(v: Vec2) {
+        const {x, y} = this;
+        return new Vec2( y*v.x - x*v.y,  x*v.y - y*v.x )
+    }
+
+    mult(n: number) {
+        const {x, y} = this;
+        return new Vec2(x* n , y* n)
+    }
+
 }
 
 export class Vec3 {
@@ -45,13 +94,23 @@ export class Vec3 {
             this.z = arg3
         }
     }
+    isVec3() {
+        return true
+    }
+    flattrn() {
+        const {x, y, z} = this;
 
+<<<<<<< HEAD
     flattrn() {
         const {x, y, z} = this;
 
         return new Float32Array([x, y, z])
     }
 
+=======
+        return new Float32Array([x, y, z])
+    }
+>>>>>>> feature-fullpbr
     burden() {
         const {x, y, z} = this;
         return new Vec3(-x, -y, -z )
@@ -98,15 +157,27 @@ export class Vec3 {
         return new Vec3(x* n , y* n, z*n)
     }
 
+    toRgb() {
+        const {x, y, z} = this;
+        const r = x / 1 * 255;
+        const g = y / 1 * 255;
+        const b = z / 1 * 255;
+        return `rgb(${r},${g},${b})`
+    }
 
+    static rgbToVec3(rgb:string) {
+        const rgbstring = rgb.replace('rgb(', '').replace(')','');
+        const rgbarray = rgbstring.split(',')
+        if(rgbarray.length === 3){
+            const x = Number.parseFloat(rgbarray[0]) /255;
+            const y = Number.parseFloat(rgbarray[1]) /255;
+            const z = Number.parseFloat(rgbarray[2]) /255;
 
-
-
-
-
-    
-
-
+            return new Vec3(x,y,z);
+        }{
+            return new Vec3(0,0,0);
+        }
+    }
 
 }
 
@@ -194,6 +265,11 @@ export class Vec4 {
     multV(v: Vec4) {
         const {x, y, z} = this;
         return new Vec4(x* v.x , y* v.y, z*v.z)
+    }
+
+    xyz() {
+        const {x, y, z} = this;
+        return new Vec3(x, y, z)
     }
 
 }

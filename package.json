@@ -1,15 +1,36 @@
 {
-  "name": "graphics",
-  "private": true,
-  "version": "0.0.0",
+  "name": "ideagraphics",
+  "version": "0.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "doc": "typedoc --options typedoc.json"
   },
+  "files": ["dist"],
+  "main": "./dist/my-lib.umd.cjs",
+  "module": "./dist/my-lib.js",
+  "exports": {
+    ".": {
+      "import": "./dist/my-lib.js",
+      "require": "./dist/my-lib.umd.cjs"
+    }
+  },
+  "repository": {"type": "git", "url": "https://github.com/LWBliuwenbo/ideagraphics"},
+  "keywords": ["Graphics", "webgl", "typescript", "3d"],
+  "license": "MIT",
+  "homepage": "https://lwbidea.com",
+  "author": {
+    "name": "LWBliuwenbo"
+  },
+  "maintainers": ["lwb_npm"],
   "devDependencies": {
-    "typescript": "^4.6.4",
-    "vite": "^3.2.3"
+    "@types/node": "^18.11.18",
+    "typescript": "^4.9.3",
+    "vite": "^4.0.4"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21"
   }
 }

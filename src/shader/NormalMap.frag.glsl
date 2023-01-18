@@ -5,6 +5,9 @@ precision mediump float;
 in vec2 vTextureCoord; // 纹理坐标
 in vec3 fragPos;
 in vec3 Normal;
+in vec3 tangent;
+in vec3 bitangent;
+in mat3 TBN;
 
 
 // 光照计算所需变量
@@ -20,7 +23,8 @@ uniform vec3 uViewPosition;
 uniform float uShininess;
 
 uniform sampler2D uMaterialDiffuse; // 拾色器
-uniform sampler2D uMaterialSpecular; // 拾色器
+// uniform sampler2D uMaterialSpecular; // 拾色器
+uniform sampler2D uMaterialNormalMap; // 法向贴图
 
 out vec4 fColor;
 void main() {
@@ -36,7 +40,11 @@ void main() {
 
 
     // 计算法向量转换
-    vec3 N = Normal;
+    vec3 N = texture(uMaterialNormalMap, vTextureCoord).rgb;
+    N = normalize(N * 2.0 - 1.0);
+    N = normalize(TBN * N);
+    
+
 
     // 环境光分量
     vec3 ambient = uLightAmbient.xyz * texture(uMaterialDiffuse, vTextureCoord).rgb;
@@ -47,7 +55,7 @@ void main() {
 
     // 计算镜面反射光分量
     float Ks = pow(max( dot( N, H ), 0.0 ), uShininess);
-    vec3 specular = Ks*uLightSpecular.xyz*texture(uMaterialSpecular, vTextureCoord).rgb;
+    vec3 specular = Ks * uLightSpecular.rgb;
 
     // 如果方向为反
     if(dot(L, N) < 0.0){

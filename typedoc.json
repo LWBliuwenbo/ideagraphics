@@ -5,5 +5,7 @@
     "tsconfig": "tsconfig.json",
     "out": "./doc",
     "plugin": ["typedoc-plugin-markdown"],
-    "name": "IdeaGraphics"
+    "name": "IdeaGraphics",
+    "readme": "none",
+    "githubPages": false
 }

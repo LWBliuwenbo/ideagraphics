@@ -1,6 +1,6 @@
 {
   "name": "ideagraphics",
-  "version": "0.0.2",
+  "version": "0.0.7",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -8,13 +8,15 @@
     "preview": "vite preview",
     "doc": "typedoc --options typedoc.json"
   },
-  "files": ["dist"],
-  "main": "./dist/my-lib.umd.cjs",
-  "module": "./dist/my-lib.js",
+  "files": ["dist","src/types"],
+  "main": "./dist/ideagraphics.umd.cjs",
+  "module": "./dist/ideagraphics.js",
+  "typings": "./src/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/my-lib.js",
-      "require": "./dist/my-lib.umd.cjs"
+      "import": "./dist/ideagraphics.js",
+      "require": "./dist/ideagraphics.umd.cjs",
+      "types": "./src/types/index.d.ts"
     }
   },
   "repository": {"type": "git", "url": "https://github.com/LWBliuwenbo/ideagraphics"},

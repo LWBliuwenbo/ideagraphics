@@ -5,7 +5,7 @@
 
 export { default as Engine } from "./Engine";
 export { Camera } from "./Camera";
-export { Light, PbrLight } from "./Light";
+export { Light, PbrLight, DirectionalLight,DotLight } from "./Light";
 export { Material, PBRMaterial } from "./Material";
 export { Cube, Sphere  } from './Mesh'
 export { EventSystem } from './EventSystem'

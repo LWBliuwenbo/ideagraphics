@@ -100,17 +100,8 @@ export class Vec3 {
     flattrn() {
         const {x, y, z} = this;
 
-<<<<<<< HEAD
-    flattrn() {
-        const {x, y, z} = this;
-
         return new Float32Array([x, y, z])
     }
-
-=======
-        return new Float32Array([x, y, z])
-    }
->>>>>>> feature-fullpbr
     burden() {
         const {x, y, z} = this;
         return new Vec3(-x, -y, -z )

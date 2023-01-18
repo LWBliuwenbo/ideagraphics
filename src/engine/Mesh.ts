@@ -2,7 +2,7 @@ import { Material, PBRMaterial } from "./Material";
 import { Vec3, Vec2 } from "./math/Vector";
 import { Transform } from "./Tansform";
 
-export  class Geometric extends Transform {
+export  class Mesh extends Transform {
 
     positions: Vec3[] = []
     colors: Vec3[] = []
@@ -87,8 +87,10 @@ export  class Geometric extends Transform {
     }
 }
 
-
-export class Cube extends Geometric {
+/**
+ * Cube 立方体
+ */
+export class Cube extends Mesh {
     positions = [
         new Vec3(-0.5, -0.5, -0.5),
         new Vec3(0.5, -0.5, -0.5),
@@ -252,7 +254,10 @@ export class Cube extends Geometric {
 
 }
 
-export class Sphere extends Geometric {
+/**
+ * Sphere 球体
+ */
+export class Sphere extends Mesh {
 
     constructor() {
         super();

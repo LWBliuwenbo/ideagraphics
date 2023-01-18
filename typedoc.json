@@ -6,6 +6,5 @@
     "out": "./doc",
     "plugin": ["typedoc-plugin-markdown"],
     "name": "IdeaGraphics",
-    "readme": "none",
     "githubPages": false
 }

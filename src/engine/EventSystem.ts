@@ -1,6 +1,5 @@
 import Engine from "./Engine";
 import { Vec2 } from "./math/Vector";
-import _ from 'lodash'
 
 export class EventSystem{
 

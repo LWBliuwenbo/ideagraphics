@@ -1,4 +1,4 @@
-import { Geometric } from "./Geometric"
+import { Mesh } from "./Mesh"
 import { Vec4,Vec3, Vec2 } from "./math/Vector"
 import fragString from '../shader/PBR.frag.glsl?raw'
 import vertexString from '../shader/PBR.vertex.glsl?raw'
@@ -20,7 +20,7 @@ export default  class Engine {
     canvas : HTMLCanvasElement
 
     /** scene 场景 */
-    scene: Geometric[]
+    scene: Mesh[]
 
     /** camera 摄像机 */
     camera: Camera
@@ -84,7 +84,7 @@ export default  class Engine {
     }
 
     /** 添加Mesh */
-    addGeo(geo: Geometric){
+    addGeo(geo: Mesh){
         this.scene.push(geo)
     }
 
@@ -131,7 +131,7 @@ export default  class Engine {
         this.light = light;
     }
     /**引擎管线：设置着色器属性 */
-    pipelineSetShaderAttr(shader: Shader, geo: Geometric) {
+    pipelineSetShaderAttr(shader: Shader, geo: Mesh) {
 
         const {gl} = this;
         gl.useProgram(shader.program);
@@ -199,7 +199,7 @@ export default  class Engine {
 
     }
     /**引擎管线：初始化着色器 */
-    pipelineTransformShaderInit(geo: Geometric) {
+    pipelineTransformShaderInit(geo: Mesh) {
         this.transformShader = new Shader(this.gl, 
             ['uTheta', 'uTranslate', 'uScale', 
              'uModelView', 'uProject',
@@ -260,7 +260,7 @@ export default  class Engine {
     
     }
     /**引擎管线：设置基础着色器通用变量 */
-    pipelineTransformRender(geo: Geometric) {
+    pipelineTransformRender(geo: Mesh) {
         if(this.transformShader){
             this.transformShader.setUniform3fv('uTheta', geo.roateTheta)
             this.transformShader.setUniform3fv('uTranslate', geo.tranlate)

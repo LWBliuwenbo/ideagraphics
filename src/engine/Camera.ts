@@ -79,7 +79,7 @@ export class Camera {
         return this
     }
 
-     radians( degrees:number ) {
+    radians( degrees:number ) {
         return degrees * Math.PI / 180.0;
     }
 

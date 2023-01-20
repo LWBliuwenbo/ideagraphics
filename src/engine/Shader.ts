@@ -2,39 +2,35 @@ import { Mat4 } from "./math/Mat"
 import { Vec3,Vec4 } from "./math/Vector"
 
 export class Shader {
-    uniforms: string[]
     uniformLocs: { [uniform: string]: WebGLUniformLocation } = {}
     program: WebGLProgram
     gl: WebGL2RenderingContext
-    constructor(gl: WebGL2RenderingContext, uniforms: string[], vertexShader?: string, fragmentShader?: string) {
-        this.uniforms = uniforms
+    constructor(gl: WebGL2RenderingContext,  vertexShader?: string, fragmentShader?: string) {
         this.gl = gl;
         this.program = this.initShaders(gl, vertexShader, fragmentShader)
-        this.getUniformsLocation();
     }
     setUniformf(uniform: string, value: number) {
-        this.gl.uniform1f(this.uniformLocs[uniform], value)
+        const loc = this.gl.getUniformLocation(this.program, uniform)
+        this.gl.uniform1f(loc, value)
     }
     setUniform3fv(uniform: string, value: Vec3) {
-        this.gl.uniform3fv(this.uniformLocs[uniform], value.flattrn())
+        const loc = this.gl.getUniformLocation(this.program, uniform)
+        this.gl.uniform3fv(loc, value.flattrn())
     }
     setUniform4fv(uniform: string, value: Vec4) {
-        this.gl.uniform4fv(this.uniformLocs[uniform], value.flattrn())
+        const loc = this.gl.getUniformLocation(this.program, uniform)
+        this.gl.uniform4fv(loc, value.flattrn())
     }
     setUniformi(uniform: string, i: number) {
-        this.gl.uniform1i(this.uniformLocs[uniform], i)
+        const loc = this.gl.getUniformLocation(this.program, uniform)
+        this.gl.uniform1i(loc, i)
     }
     setUniformMat4fv(uniform:string, mat4: Mat4 ) {
-        this.gl.uniformMatrix4fv(this.uniformLocs[uniform], false, mat4.flattrn());
+        const loc = this.gl.getUniformLocation(this.program, uniform)
+        this.gl.uniformMatrix4fv(loc, false, mat4.flattrn());
     }
-    getUniformsLocation() {
-       this.uniforms.forEach((uniform) => {
-            const loc = this.gl.getUniformLocation(this.program, uniform)
-            if (loc === null) {
-                return
-            }
-            this.uniformLocs[uniform] = loc;
-        })
+    getAttribLocation(attrname: string) {
+        return this.gl.getAttribLocation(this.program, attrname);
     }
 
     initShaders(gl: WebGL2RenderingContext, vertexShader?: string, fragmentShader?: string) {

@@ -2,86 +2,59 @@
 // 使用Blinn-Phong 光照模型，为引擎实现光照模块，光照负责光照相关数据管理，生成，
 // 主要计算在Shader中
 
-import { Vec3, Vec4 } from "./math/Vector";
-
-export class Light {
-
-    // 光源位置
-    lightPosition: Vec4 = new Vec4;
-
-    // color for pbr
-    lightColor:Vec4 = new Vec4;
-
-    // 光源颜色：环境光分量
-    lightAmbient: Vec4 = new Vec4;
-    // 光源颜色：漫反射光分量
-    lightDiffuse: Vec4 = new Vec4;
-    // 光源颜色：镜面反射光分量
-    lightSpecular: Vec4 = new Vec4;
-
-    setPosition(p: Vec4) {
-        this.lightPosition = p;
-    }
-
-    setColor(color:Vec4) {
-        this.lightColor = color;
-    }
-
-    setAmbient(v: Vec4) {
-        this.lightAmbient = v;
-    }
-
-    setDiffuse(v: Vec4) {
-        this.lightDiffuse = v;
-    }
-
-    setSpecular(v: Vec4) {
-        this.lightSpecular = v;
-    }
-
-}
-
-export class PbrLight extends Light {
-    type: number = -1
-    position: Vec3 = new Vec3(0, 0, 1)
-    itensity:number = 25000
-    falloffradius: number = 0
-    color:Vec3 = new  Vec3(1,1,1)
-
-    setProps(light: PbrLight) {
-        this.type = light.type;
-        this.position = light.position;
-        this.color = light.color
-        this.itensity = light.itensity;
-    }
-}
+import { Vec3 } from "./math/Vector";
 
 
 export const LIGHT_TYPE_DIRECTIONAL = 0;
 export const LIGHT_TYPE_DOT = 1;
 
+export class Light {
 
-export class DirectionalLight extends PbrLight {
-    type = LIGHT_TYPE_DIRECTIONAL
+    type = LIGHT_TYPE_DIRECTIONAL;
 
-    position:Vec3 = new Vec3(2, 2, 2)
+    brightness = 1.0;
+    gamma = 2.2;
+    exposure = 0.0;
+    
+    inTheta = 0.285398163;
+    inPhi = 0.285398163;
 
-    color:Vec3 = new  Vec3(1,1,1)
+    doubleTheta = true;
+    useNDotL = true;
 
-    //  照度灯光单元(lx)
-    itensity:number = 9000
+    incidentVector: Vec3 = new Vec3();
+
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        let useTheta = this.inTheta;
+        if( this.doubleTheta )
+            useTheta *= 2.0;
+    
+        this.incidentVector.x = Math.sin(useTheta) * Math.cos(this.inPhi);
+        this.incidentVector.y = Math.sin(useTheta) * Math.sin(this.inPhi);
+        this.incidentVector.z = Math.cos(useTheta);
+    }
+
+    setProps(light : Light) {
+        const {brightness, gamma, exposure, inTheta, inPhi, doubleTheta, useNDotL } = light;
+        this.brightness = brightness;
+        this.gamma = gamma;
+        this.exposure = exposure;
+        this.inTheta = inTheta;
+        this.inPhi = inPhi;
+        this.doubleTheta = doubleTheta;
+        this.useNDotL = useNDotL;
+    }
 }
 
-export class DotLight extends PbrLight {
-
-    type = LIGHT_TYPE_DOT
-    
-    position:Vec3 = new Vec3(3, 3, 3)
-    
-    itensity:number = 100
-
-    color:Vec3 = new  Vec3(1,1,1)
-
-    falloffradius: number = 0
+export class PbrLight extends Light {
 }
+
+
+
+
+
 

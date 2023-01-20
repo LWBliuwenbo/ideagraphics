@@ -1,6 +1,6 @@
 {
   "name": "ideagraphics",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -14,7 +14,7 @@
   "typings": "./src/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/ideagraphics.js",
+      "import": "./src/engine/index.ts",
       "require": "./dist/ideagraphics.umd.cjs",
       "types": "./src/types/index.d.ts"
     }

@@ -2,50 +2,22 @@
 
 precision mediump float;
 
-in vec2 vTextureCoord; // 纹理坐标
-in vec3 fragPos;
-in vec3 Normal;
-in vec3 tangent;
-in vec3 bitangent;
-in mat3 TBN;
-in vec3 radiance; // 光照辐射度 
+uniform vec3 incidentVector;
+uniform float incidentTheta;
+uniform float incidentPhi;
 
+uniform float brightness;
+uniform float gamma;
+uniform float exposure;
+uniform float useNDotL;
 
-// 光照计算所需变量
-// 环境光颜色分量与材质反色属性各分量相乘
-// uniform vec4 uLightAmbient;
-// uniform vec4 uLightDiffuse;
-// uniform vec4 uLightSpecular; 
+in vec4 worldSpaceVert;
+in vec4 eyeSpaceVert;
 
-uniform vec3 uLightColor;
-
-// 光源：类型
-uniform int uLightType;
-
-// 光源：位置
-uniform vec3 uLightPosition;
-
-// 光源：强度
-uniform float uLightItensity;
-
-// 光源：衰减半径
-
-uniform float ulightInvRadius;
-
-// 眼睛位置
-uniform vec3 uViewPosition;
-
-// 高光
-uniform float uShininess;
-
-uniform sampler2D uMaterialDiffuse; // 拾色器
-// uniform sampler2D uMaterialSpecular; // 拾色器
-uniform sampler2D uMaterialNormalMap; // 法向贴图
-
-out vec4 fColor;
+out vec4 fragColor;
 
 // 固有色 使用纹理传入
-// uniform vec3 baseColor;
+uniform vec3 baseColor;
 
 /*
 金属度，规定电介质为0，金属为1；
@@ -156,14 +128,7 @@ vec3 mon2lin(vec3 x)
     return vec3(pow(x[0], 2.2), pow(x[1], 2.2), pow(x[2], 2.2));
 }
 
-vec3 lightradiance() {
-    float distance = length(uLightPosition.xyz - fragPos);
-    float attenuation = 1.0 / (distance * distance);
-    return uLightColor.rgb * attenuation;
-}
-
-
-vec3 BRDF( vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
+vec3 BRDF( vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
 {
     //准备参数
     float NdotL = dot(N,L);
@@ -231,81 +196,126 @@ vec3 BRDF( vec3 baseColor, vec3 L, vec3 V, vec3 N, vec3 X, vec3 Y )
         + Gs*Fs*Ds + .25*clearcoat*Gr*Fr*Dr;
 }
 
-// 平行光
-vec3 light_direct_luminance (vec3 baseColor, vec3 V, vec3 N, vec3 X, vec3 Y) {
-      // 光源位置 
-    vec3 light = uLightPosition.xyz;
-    // 光源与点线
-    vec3 L = normalize(light);
+float lightDistanceFromCenter = 2.2;
 
-    float NoL = clamp(dot(N, L), 0.0, 1.0);
 
-    // lightIntensity为垂直入射时的照度, 单位 lux
-    float illuminance = (uLightItensity / 683.0 ) * NoL;
 
-    return vec3(0.3) +  BRDF(baseColor, L,V,N, X, Y) * illuminance;
-}
+vec3 computeWithDirectionalLight( vec3 surfPt, vec3 incidentVector, vec3 viewVec, vec3 normal, vec3 tangent, vec3 bitangent )
+{
+    // evaluate the BRDF
+    vec3 b = max( BRDF( incidentVector, viewVec, normal, tangent, bitangent ), vec3(0.0) );
 
-// 点光源：计算衰减
-float getSquareFalloffAttenuation(vec3 posToLight, float lightInvRadius) {
-    float distanceSquare = dot(posToLight, posToLight);
-    float factor = distanceSquare * lightInvRadius * lightInvRadius;
-    float smoothFactor = max(1.0 - factor * factor, 0.0);
-    return (smoothFactor * smoothFactor) / max(distanceSquare, 1e-4);
+    // multiply in the cosine factor
+    if (useNDotL != 0.0)
+        b *= dot( normal, incidentVector );
+
+    return b;
 }
 
 
+vec3 computeWithPointLight( vec3 surfPt, vec3 incidentVector, vec3 viewVec, vec3 normal, vec3 tangent, vec3 bitangent )
+{
+    // compute the point light vector
+    vec3 toLight = (incidentVector * lightDistanceFromCenter) - surfPt;
+    float pointToLightDist = length( toLight );
+    toLight /= pointToLightDist;
 
 
+    // evaluate the BRDF
+    vec3 b = max( BRDF( toLight, viewVec, normal, tangent, bitangent ), vec3(0.0) );
 
-// 点光源
-vec3 light_point_luminance(vec3 baseColor, vec3 V, vec3 N, vec3 X, vec3 Y) {
+    // multiply in the cosine factor
+    if (useNDotL != 0.0)
+        b *= dot( normal, toLight );
 
-     // 光源位置 
-    vec3 light = uLightPosition.xyz;
+    // multiply in the falloff
+    b *= (1.0 / (pointToLightDist*pointToLightDist));
 
-    vec3 posToLight = light - fragPos;
-    // 光源与点线
-    vec3 L = normalize(posToLight);
-
-    float NoL = clamp(dot(N, L), 0.0, 1.0);
-
-    float attenuation;
-
-    attenuation  = getSquareFalloffAttenuation(posToLight, ulightInvRadius);
-    //TODO 聚光灯衰减计算
-
-    // lightIntensity为垂直入射时的照度, 单位 w/m*m
-    float illuminance = uLightItensity *attenuation* NoL;
-
-    return vec3(0.03) + BRDF(baseColor, L,V,N, X, Y) * illuminance * uLightColor;
+    return b;
 }
 
 
-void main() {
 
-    
-    // 视线方向
-    vec3 V = normalize(uViewPosition - fragPos);
+vec3 computeWithAreaLight( vec3 surfPt, vec3 incidentVector, vec3 viewVec, vec3 normal, vec3 tangent, vec3 bitangent )
+{
+    float lightRadius = 0.5;
+
+    vec3 lightPoint = (incidentVector * lightDistanceFromCenter);
+
+    // define the surface of the light source (we'll have it always face the sphere)
+    vec3 toLight = normalize( (incidentVector * lightDistanceFromCenter) - surfPt );
+    vec3 uVec = cross( toLight, vec3(1,0,0) );
+    vec3 vVec = cross( uVec, toLight );
+
+    vec3 result = vec3(0.0);
+
+    float u = -1.0;
+    for( int i = 0; i < 5; i++ )
+    {
+        float v = -1.0;
+        for( int j = 0; j < 5; j++ )
+        {
+            vec3 vplPoint = lightPoint + (uVec*u + vVec*v)*lightRadius;
+
+            // compute the point light vector
+            vec3 toLight = vplPoint - surfPt;
+            float pointToLightDist = length( toLight );
+            toLight /= pointToLightDist;
 
 
-    // 计算法向量转换
-    vec3 N = normalize(Normal);
+            // evaluate the BRDF
+            vec3 b = max( BRDF( toLight, viewVec, normal, tangent, bitangent ), vec3(0.0) );
 
-    vec3 L = normalize(uLightPosition - fragPos);
-    vec3 X = normalize(tangent);
-    vec3 Y = normalize(bitangent);
+            // multiply in the cosine factor
+            if (useNDotL != 0.0)
+                b *= dot( normal, toLight );
 
-    vec3 baseColor = vec3(0.87f, 0.85f, 0.76f);
-    vec3 b ;
-    if(uLightType == 1){
-        b =  vec3(  BRDF(baseColor, L, V, N, X, Y));
-    }else if(uLightType == 0){
-        b =  vec3( BRDF(baseColor,L,  V, N, X, Y));
+            // multiply in the falloff
+            b *= (1.0 / (pointToLightDist*pointToLightDist));
+
+
+
+            result += b;
+
+            v += 0.4;
+        }
+        u += 0.4;
     }
 
-    b = max(b, vec3(0.0));
-    b*= dot(L, N) + vec3(0.2);
+    result /= 25.0;
 
-    fColor = vec4(b, 1.0);
+
+    return result;
 }
+
+
+void main(void)
+{
+    // orthogonal vectors
+    vec3 normal = normalize( worldSpaceVert.xyz );
+    vec3 tangent = normalize( cross( vec3(0,1,0), normal ) );
+    vec3 bitangent = normalize( cross( normal, tangent ) );
+
+
+    // calculate the viewing vector
+    //vec3 viewVec = -normalize(eyeSpaceVert.xyz);
+    vec3 surfacePos = normalize( worldSpaceVert.xyz );
+    vec3 viewVec = vec3(0,0,1); // ortho mode
+
+
+    vec3 b = computeWithDirectionalLight( surfacePos, incidentVector, viewVec, normal, tangent, bitangent );
+    // vec3 b = computeWithPointLight( surfacePos, incidentVector, viewVec, normal, tangent, bitangent );
+    // vec3 b = computeWithAreaLight( surfacePos, incidentVector, viewVec, normal, tangent, bitangent );
+
+    // brightness
+    b *= brightness;
+
+    // exposure
+    b *= pow( 2.0, exposure );
+
+    // gamma
+    b = pow( b, vec3( 1.0 / gamma ) );
+
+    fragColor = vec4( clamp( b, vec3(0.0), vec3(1.0) ), 1.0 );
+}
+

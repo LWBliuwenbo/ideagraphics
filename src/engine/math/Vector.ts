@@ -67,6 +67,12 @@ export class Vec2 {
         return new Vec2(x* n , y* n)
     }
 
+    flattrn() {
+        const {x, y} = this;
+
+        return new Float32Array([x, y])
+    }
+
 }
 
 export class Vec3 {

@@ -41,7 +41,19 @@ export class Mat4 {
         for (let i = 0; i < result.length; i++) floats[i] = result[i];
         return floats;
     }
+    inverse() {
+        const result: number[][] = []
+        for (let i = 0; i < this.out.length; i++)  {
+            if(result[i] == undefined){
+                result[i] = []
+            }
 
+            for (let j = 0; j < 4; j++){
+                result[i][j] = this.out[j][i]
+            }
+        }
+        return new Mat4(result)
+    }
     mult(mat4: Mat4): Mat4 {
         const result: number[][] = []
         for (let i = 0; i < this.out.length; i++) for (let j = 0; j < mat4.out.length; j++) {
@@ -62,6 +74,34 @@ export class Mat4 {
         x* mat4[0][1] + y*mat4[1][1] + z * mat4[2][1] + mat4[3][1],
         x* mat4[0][2] + y*mat4[1][2] + z * mat4[2][2] + mat4[3][2],
       )
+    }
+
+   static getRoateX(deg:number) {
+        const PI = 3.1415926;
+        const angle = deg * PI / (180);
+        const c = Math.cos(angle)
+        const s = Math.sin(angle);
+        // 绕x 轴旋转
+        return  new Mat4([
+                1.0,  0.0,  0.0, 0.0,
+                0.0,  c,  s, 0.0,
+                0.0, -s,  c, 0.0,
+                0.0,  0.0,  0.0, 1.0
+        ])
+    }
+
+    static getRoateY (deg:number) {
+        const PI = 3.1415926;
+        const angle = deg * PI / (180);
+        const c = Math.cos(angle)
+        const s = Math.sin(angle);
+        // 绕x 轴旋转
+        return new Mat4([
+                c, 0.0, -s, 0.0,
+                0.0, 1.0,  0.0, 0.0,
+                s, 0.0,  c, 0.0,
+                0.0, 0.0,  0.0, 1.0
+        ])
     }
 
 }

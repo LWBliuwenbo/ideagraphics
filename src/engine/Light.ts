@@ -16,8 +16,8 @@ export class Light {
     gamma = 2.2;
     exposure = 0.0;
     
-    inTheta = 0.285398163;
-    inPhi = 0.285398163;
+    inTheta = 0.785398163;
+    inPhi = 0.785398163;
 
     doubleTheta = true;
     useNDotL = true;

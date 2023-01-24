@@ -31,3 +31,7 @@ export function flattenV2(vecs : Vec2[]) {
 
     return buffer
 }
+// 像素颜色亮度
+export function luminance(rgb: number[] ){
+    return 0.3*rgb[0] + 0.59*rgb[1] + 0.11*rgb[2];
+}

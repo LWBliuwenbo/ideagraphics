@@ -5,6 +5,7 @@ import {Shader} from "./Shader"
 import { Camera } from "./Camera"
 import {  Light } from "./Light"
 import { EventSystem } from './EventSystem'
+import { IBL } from "./ibl/IBL"
 
 /**
  * 引擎类: 用于实例化化图形引擎
@@ -37,6 +38,8 @@ export default  class Engine {
     animateid:number| null
 
     shader:Shader
+
+    ibl: IBL | null = null
 
     /**
      * Engine 构造器
@@ -95,10 +98,17 @@ export default  class Engine {
         this.light = light;
     }
 
+    setIBL( ibl:IBL ) {
+        this.ibl = ibl;
+    }
+
     drawInit() {
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
+        if(this.ibl) {
+            this.shader = this.ibl.IBLShader;
+        }
         this.gl.useProgram(this.shader.program)
         this.drawInitCamera();
         this.drawInitLight();
@@ -132,10 +142,14 @@ export default  class Engine {
     render( ) {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-        this.scene.forEach((mesh:Mesh)=> {
-            mesh.draw(this.shader)
-            mesh.material.draw(this.shader);
-        })
+        if(this.ibl){
+            this.ibl.draw();
+        }else {
+            this.scene.forEach((mesh:Mesh)=> {
+                mesh.draw(this.shader)
+                mesh.material.draw(this.shader);
+            })
+        }
 
 
        this.animateid = requestAnimationFrame(this.render.bind(this))

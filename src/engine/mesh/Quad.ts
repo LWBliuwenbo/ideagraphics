@@ -1,6 +1,6 @@
-import { Vec3, Vec2 } from "../math/Vector";
+import {  Vec2 } from "../math/Vector";
 import { Shader } from "../Shader";
-import { flatten, flattenV2 } from "../untils";
+import {  flattenV2 } from "../untils";
 import { Mesh } from "./Mesh";
 
 

@@ -1,6 +1,6 @@
 import { Mat4 } from "./math/Mat"
-import { Vec3,Vec4 } from "./math/Vector"
-
+import { Vec2, Vec3,Vec4 } from "./math/Vector"
+import { Texture } from "./Texture"
 export class Shader {
     uniformLocs: { [uniform: string]: WebGLUniformLocation } = {}
     program: WebGLProgram
@@ -12,6 +12,10 @@ export class Shader {
     setUniformf(uniform: string, value: number) {
         const loc = this.gl.getUniformLocation(this.program, uniform)
         this.gl.uniform1f(loc, value)
+    }
+    setUniform2fv(uniform:string, value: Vec2) {
+        const loc = this.gl.getUniformLocation(this.program, uniform)
+        this.gl.uniform2fv(loc, value.flattrn());
     }
     setUniform3fv(uniform: string, value: Vec3) {
         const loc = this.gl.getUniformLocation(this.program, uniform)
@@ -25,9 +29,20 @@ export class Shader {
         const loc = this.gl.getUniformLocation(this.program, uniform)
         this.gl.uniform1i(loc, i)
     }
+    
     setUniformMat4fv(uniform:string, mat4: Mat4 ) {
         const loc = this.gl.getUniformLocation(this.program, uniform)
         this.gl.uniformMatrix4fv(loc, false, mat4.flattrn());
+    }
+
+    setUniformTexture( uniform:string, tex: Texture,  value: number){
+        this.gl.activeTexture(this.gl.TEXTURE0 + value);
+        this.gl.bindTexture(tex.textureType, tex.texture);
+       const loc = this.gl.getUniformLocation(this.program, uniform)
+       if(loc == -1){
+        return
+       }
+       this.gl.uniform1i(loc, value);
     }
     getAttribLocation(attrname: string) {
         return this.gl.getAttribLocation(this.program, attrname);

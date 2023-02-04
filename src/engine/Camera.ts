@@ -54,7 +54,8 @@ export class Camera {
         return this;
     }
     // 生成正投影
-    ortho(left: number, right: number, bottom: number, top: number, far: number, near: number) {
+    ortho(left: number, right: number, bottom: number, top: number, far: number = 1, near: number = -1) {
+        
         this.projectionMatrix =  new Mat4([
             2/(right-left), 0, 0, 0,
             0, 2/(top-bottom), 0, 0,
@@ -65,6 +66,8 @@ export class Camera {
 
         return this;
     }
+
+
 
     // 生成透视投影
     frustum(left: number, right: number, bottom: number, top: number, far: number, near: number) {

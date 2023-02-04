@@ -10,6 +10,7 @@ export abstract class Material {
     colorMap: Texture = new Texture();
 
     abstract draw(shader: Shader) :void;
+    abstract setProps(props: Material):void;
 }
 export class PhongMaterial extends Material {
 
@@ -25,6 +26,9 @@ export class PhongMaterial extends Material {
 
     draw(shader: Shader) {
         shader.setUniformf('shininess', this.materialShininess)
+    }
+    setProps() {
+        
     }
 }
 export class PBRMaterial extends Material{

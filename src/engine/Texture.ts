@@ -129,7 +129,7 @@ export class Texture {
 
     }
 
-    static createCubeTexture(gl: WebGL2RenderingContext, imagegl: CanvasRenderingContext2D, width: number, height: number, imageUrls: string[]) {
+    static createCubeTexture(gl: WebGL2RenderingContext, width: number, height: number, imageUrls: string[]) {
         const targets =
             [gl.TEXTURE_CUBE_MAP_POSITIVE_X,
             gl.TEXTURE_CUBE_MAP_NEGATIVE_X,
@@ -138,7 +138,7 @@ export class Texture {
             gl.TEXTURE_CUBE_MAP_POSITIVE_Z,
             gl.TEXTURE_CUBE_MAP_NEGATIVE_Z];
         let load_finish = false;
-        const texImageData = new ImageData(6 * width, height);
+        // const texImageData = new ImageData(6 * width, height);
         return new Promise((resolve) => {
             const result = new Texture();
             const texture_index = getTextureIndex(gl, ++GLOBAL_INDEX)
@@ -149,39 +149,36 @@ export class Texture {
             }
 
             const cubeEnvTex = gl.createTexture();
-            gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeEnvTex)
-            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_NEAREST)
-
 
             const faceNum = imageUrls.length
             for (let i = 0; i < faceNum; i++) {
                 const image = new Image();
+                gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeEnvTex)
 
                 image.onload = () => {
-                    console.log(targets[i])
-                    gl.bindTexture(gl.TEXTURE_CUBE_MAP, cubeEnvTex)
-                    gl.texImage2D(targets[i], 0, gl.RGB, width, height, 0, gl.RGB, gl.UNSIGNED_BYTE, image);
+                    console.log(width,height)
+                    gl.texImage2D(targets[i], 0, gl.RGBA, width, height, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
 
 
-                    if (imagegl) {
-                        imagegl.drawImage(image, 0, 0, width, height);
-                        const imageData = imagegl.getImageData(0, 0, width, height);
-                        if (!imageData) {
-                            return
-                        }
-                        for (let row = 0; row < height; row++) {
+                    // if (imagegl) {
+                    //     imagegl.drawImage(image, 0, 0, width, height);
+                    //     const imageData = imagegl.getImageData(0, 0, width, height);
+                    //     if (!imageData) {
+                    //         return
+                    //     }
+                    //     for (let row = 0; row < height; row++) {
 
-                            for (let col = 0; col < width; col++) {
+                    //         for (let col = 0; col < width; col++) {
 
-                                const base_px_index = (row  * width  + col) * 4;
-                                const target_px_index = (width * faceNum * (row - 1) + i * width + col)*4;
-                                texImageData.data[target_px_index] = imageData.data[base_px_index]
-                                texImageData.data[target_px_index + 1] = imageData.data[base_px_index + 1]
-                                texImageData.data[target_px_index + 2] = imageData.data[base_px_index + 2]
-                                texImageData.data[target_px_index + 3] = imageData.data[base_px_index + 3]
+                    //             const base_px_index = (row  * width  + col) * 4;
+                    //             const target_px_index = (width * faceNum * (row - 1) + i * width + col)*4;
+                    //             texImageData.data[target_px_index] = imageData.data[base_px_index]
+                    //             texImageData.data[target_px_index + 1] = imageData.data[base_px_index + 1]
+                    //             texImageData.data[target_px_index + 2] = imageData.data[base_px_index + 2]
+                    //             texImageData.data[target_px_index + 3] = imageData.data[base_px_index + 3]
 
-                            }
-                        }
+                    //         }
+                    //     }
 
 
 
@@ -190,11 +187,12 @@ export class Texture {
                         }
 
                         if (load_finish) {
+                            gl.generateMipmap(gl.TEXTURE_CUBE_MAP);
+                            gl.texParameteri(gl.TEXTURE_CUBE_MAP, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
                             result.texture = cubeEnvTex;
-                            result.image = texImageData;
                             resolve(result)
                         }
-                    }
+                    // }
                 }
                 image.src = imageUrls[i];
             }

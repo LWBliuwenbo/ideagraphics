@@ -105,3 +105,108 @@ export class Mat4 {
     }
 
 }
+
+export class Mat3 {
+    out: number[][] = []
+
+    constructor(input: number[]);
+    constructor(input: number[][]);
+
+
+    constructor(input: any) {
+        if (!input || input.length == 0) {
+            this.out = []
+        } else if (input.length === 3) {
+            this.out = input;
+        } else {
+            this.out = this.initMat(input);
+        }
+    }
+
+
+    initMat(input: number[]) {
+        const out: number[][] = []
+
+        for (let i = 0; i < 3; i++) {
+            out[i] = []
+            for (let f = 0; f < 3; f++) {
+                out[i][f] = input[i * 4 + f]
+            }
+        }
+
+        return out;
+    }
+
+    flattrn() {
+        let result: number[] = [];
+        for (let i = 0; i < this.out.length; i++) {
+            result = result.concat(this.out[i])
+        }
+        var floats = new Float32Array(result.length)
+        for (let i = 0; i < result.length; i++) floats[i] = result[i];
+        return floats;
+    }
+    inverse() {
+        const result: number[][] = []
+        for (let i = 0; i < this.out.length; i++)  {
+            if(result[i] == undefined){
+                result[i] = []
+            }
+
+            for (let j = 0; j < 3; j++){
+                result[i][j] = this.out[j][i]
+            }
+        }
+        return new Mat3(result)
+    }
+    mult(mat3: Mat3): Mat3 {
+        const result: number[][] = []
+        for (let i = 0; i < this.out.length; i++) for (let j = 0; j < mat3.out.length; j++) {
+            if(result[i] == undefined){
+                result[i] = []
+            }
+            result[i][j] = 0.0;
+            for (var k = 0; k < 3; k++) result[i][j] += this.out[i][k] * mat3.out[k][j];
+        }
+        return new Mat3(result)
+    }
+
+    static multVe3(vec3: Vec3, mat:Mat3) { 
+        const {x, y, z} = vec3
+        const mat3 = mat.out;
+      return new Vec3(
+        x* mat3[0][0] + y*mat3[1][0] + z * mat3[2][0],
+        x* mat3[0][1] + y*mat3[1][1] + z * mat3[2][1],
+        x* mat3[0][2] + y*mat3[1][2] + z * mat3[2][2],
+      )
+    }
+
+   static getRoateX(deg:number) {
+        const PI = 3.1415926;
+        const angle = deg * PI / (180);
+        const c = Math.cos(angle)
+        const s = Math.sin(angle);
+        // 绕x 轴旋转
+        return  new Mat4([
+                1.0,  0.0,  0.0, 0.0,
+                0.0,  c,  s, 0.0,
+                0.0, -s,  c, 0.0,
+                0.0,  0.0,  0.0, 1.0
+        ])
+    }
+
+    static getRoateY (deg:number) {
+        const PI = 3.1415926;
+        const angle = deg * PI / (180);
+        const c = Math.cos(angle)
+        const s = Math.sin(angle);
+        // 绕x 轴旋转
+        return new Mat4([
+                c, 0.0, -s, 0.0,
+                0.0, 1.0,  0.0, 0.0,
+                s, 0.0,  c, 0.0,
+                0.0, 0.0,  0.0, 1.0
+        ])
+    }
+
+}

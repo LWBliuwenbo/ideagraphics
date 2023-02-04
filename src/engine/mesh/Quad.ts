@@ -4,7 +4,7 @@ import {  flattenV2 } from "../untils";
 import { Mesh } from "./Mesh";
 
 
-export class Sphere extends Mesh {
+export class Quad extends Mesh {
 
     vao: WebGLVertexArrayObject|null = null;
     bufs: (WebGLBuffer|null)[] = []

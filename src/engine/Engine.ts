@@ -6,6 +6,10 @@ import { Camera } from "./Camera"
 import {  Light } from "./Light"
 import { EventSystem } from './EventSystem'
 import { IBL } from "./ibl/IBL"
+import { Env } from "./env/Env"
+import { Texture } from "./Texture"
+import { Model } from "./model/Model"
+import { Material } from "./Material"
 
 /**
  * 引擎类: 用于实例化化图形引擎
@@ -20,7 +24,7 @@ export default  class Engine {
     canvas : HTMLCanvasElement
 
     /** scene 场景 */
-    scene: Mesh[]
+    scene: Model[]
 
     /** camera 摄像机 */
     camera: Camera
@@ -40,6 +44,8 @@ export default  class Engine {
     shader:Shader
 
     ibl: IBL | null = null
+
+    env: Env | null = null
 
     /**
      * Engine 构造器
@@ -85,8 +91,11 @@ export default  class Engine {
     }
 
     /** 添加Mesh */
-    addGeo(geo: Mesh){
+    addModel(geo: Model){
         this.scene.push(geo)
+        if(this.env){
+            this.env.models = this.scene
+        }
     }
 
     /**设置 摄像机 */
@@ -98,17 +107,28 @@ export default  class Engine {
         this.light = light;
     }
 
-    setIBL( ibl:IBL ) {
-        this.ibl = ibl;
+    updateMaterial(index: number, material: Material) {
+        if(this.scene[index]){
+            this.scene[index].material.setProps(material)
+        }
+    }
+
+    updateLight(light:Light) {
+         this.light.setProps(light)
+    }
+
+    // setIBL( ibl:IBL ) {
+    //     this.ibl = ibl;
+    // }
+
+    setEnv(CubeTexture: Texture) {
+        this.env = new Env(this.gl, CubeTexture, this.scene, this.light )
     }
 
     drawInit() {
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
-        if(this.ibl) {
-            this.shader = this.ibl.IBLShader;
-        }
         this.gl.useProgram(this.shader.program)
         this.drawInitCamera();
         this.drawInitLight();
@@ -122,7 +142,6 @@ export default  class Engine {
         this.shader?.setUniform3fv('viewPosition', this.camera.viewPosition)
         this.shader?.setUniformMat4fv('modelViewMatrix', this.camera.modelViewMatrix)
         this.shader?.setUniformMat4fv('projectionMatrix', this.camera.projectionMatrix)
-
     }
 
     drawInitLight () {
@@ -142,17 +161,16 @@ export default  class Engine {
     render( ) {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
 
-        if(this.ibl){
-            this.ibl.draw();
+        if(this.env){
+            this.env.draw(this.shader);
         }else {
             this.scene.forEach((mesh:Mesh)=> {
-                mesh.draw(this.shader)
                 mesh.material.draw(this.shader);
+                mesh.draw(this.shader)
             })
         }
 
-
-       this.animateid = requestAnimationFrame(this.render.bind(this))
+         this.animateid = requestAnimationFrame(this.render.bind(this))
 
 
     }
@@ -165,6 +183,9 @@ export default  class Engine {
     /**引擎管线：清除场景和动画 */
     clear() {
         this.scene = []
+        if(this.env){
+            this.env.models = this.scene
+        }
         this.clearAnimate();
     }
 }

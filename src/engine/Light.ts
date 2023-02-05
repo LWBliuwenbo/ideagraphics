@@ -13,11 +13,11 @@ export class Light {
     type = LIGHT_TYPE_DIRECTIONAL;
 
     brightness = 1.0;
-    gamma = 2.2;
+    gamma = 1.5;
     exposure = 0.0;
     
-    inTheta = 0.785398163;
-    inPhi = 0.785398163;
+    inTheta = 0.485398163;
+    inPhi = 0.485398163;
 
     doubleTheta = true;
     useNDotL = true;

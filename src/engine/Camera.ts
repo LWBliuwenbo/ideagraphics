@@ -144,6 +144,11 @@ export class Camera {
     }
 
 
+    update(camera: Camera) {
+        this.setViewPosition(camera.viewPosition)
+    }
+
+
 
     
 }

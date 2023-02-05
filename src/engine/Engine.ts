@@ -115,17 +115,43 @@ export default  class Engine {
 
     updateLight(light:Light) {
          this.light.setProps(light)
+         this.drawInitLight();
+         this.clearAnimate();
+         this.render();
+    }
+
+    updateCamera(camera: Camera) {
+        this.camera.update(camera)
+        this.drawInitCamera();
+        this.clearAnimate();
+        this.render();
+    }
+
+    upateEnv(phi: number, theta:number){
+        if(this.env != null){
+            this.env.envPhi = phi;
+            this.env.envTheta = theta
+            this.env.lookAtEnv();
+            this.clearAnimate();
+            this.render();
+        }
     }
 
     // setIBL( ibl:IBL ) {
     //     this.ibl = ibl;
     // }
 
-    setEnv(CubeTexture: Texture) {
+    setEnv(CubeTexture: Texture| null) {
+        if(CubeTexture === null){
+            this.env = null
+            return
+        }
         this.env = new Env(this.gl, CubeTexture, this.scene, this.light )
+        this.env.models = this.scene
     }
 
     drawInit() {
+        console.log(this.canvas.width, this.canvas.height)
         this.gl.viewport(0, 0, this.canvas.width, this.canvas.height);
         this.gl.clearColor(1.0, 1.0, 1.0, 1.0);
         this.gl.enable(this.gl.DEPTH_TEST);
@@ -139,14 +165,17 @@ export default  class Engine {
         // this.shader.setUniform3fv('uTranslate', geo.tranlate)
         // this.shader.setUniform3fv('uScale', geo.scale)
         // Camera
+        this.shader.enable();
         this.shader?.setUniform3fv('viewPosition', this.camera.viewPosition)
         this.shader?.setUniformMat4fv('modelViewMatrix', this.camera.modelViewMatrix)
+        const normalMatrix = this.camera.modelViewMatrix.inverse()
+        this.shader?.setUniformMat4fv('normalMatrix', normalMatrix)
         this.shader?.setUniformMat4fv('projectionMatrix', this.camera.projectionMatrix)
     }
 
     drawInitLight () {
         // Light
-        
+        this.shader.enable();
         this.shader.setUniform3fv( "incidentVector", this.light.incidentVector );
         this.shader.setUniformf( "incidentTheta", this.light.inTheta );
         this.shader.setUniformf( "incidentPhi", this.light.inPhi );
@@ -160,7 +189,7 @@ export default  class Engine {
     /**引擎管线：渲染函数 */
     render( ) {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
-
+        this.shader.enable();
         if(this.env){
             this.env.draw(this.shader);
         }else {

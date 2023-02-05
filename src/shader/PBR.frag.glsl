@@ -13,6 +13,9 @@ uniform float useNDotL;
 
 in vec4 worldSpaceVert;
 in vec4 eyeSpaceVert;
+in vec3 eyeSpaceNormal;
+in vec3 eyeSpaceTangent;
+in vec3 eyeSpaceBitangent;
 
 out vec4 fragColor;
 
@@ -292,18 +295,17 @@ vec3 computeWithAreaLight( vec3 surfPt, vec3 incidentVector, vec3 viewVec, vec3 
 void main(void)
 {
     // orthogonal vectors
-    vec3 normal = normalize( worldSpaceVert.xyz );
-    vec3 tangent = normalize( cross( vec3(0,1,0), normal ) );
-    vec3 bitangent = normalize( cross( normal, tangent ) );
+    vec3 normal = normalize( eyeSpaceNormal);
+    vec3 tangent = normalize( eyeSpaceTangent );
+    vec3 bitangent = normalize( eyeSpaceBitangent );
 
 
     // calculate the viewing vector
     //vec3 viewVec = -normalize(eyeSpaceVert.xyz);
-    vec3 surfacePos = normalize( worldSpaceVert.xyz );
     vec3 viewVec = vec3(0,0,1); // ortho mode
 
 
-    vec3 b = computeWithDirectionalLight( surfacePos, incidentVector, viewVec, normal, tangent, bitangent );
+    vec3 b = computeWithDirectionalLight(eyeSpaceVert.xyz , incidentVector, viewVec, normal, tangent, bitangent );
     // vec3 b = computeWithPointLight( surfacePos, incidentVector, viewVec, normal, tangent, bitangent );
     // vec3 b = computeWithAreaLight( surfacePos, incidentVector, viewVec, normal, tangent, bitangent );
 

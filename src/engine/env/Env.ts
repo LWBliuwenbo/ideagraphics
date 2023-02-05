@@ -79,15 +79,16 @@ export class Env {
         this.models = models
 
         this.quad = new Quad(this.gl)
-
-        this.envRotMatrix = Mat4.getRoateY(this.envPhi).mult(Mat4.getRoateY(this.envTheta));
-    
-        this.envRotMatrixInverse = this.envRotMatrix.inverse();
+        
+        this.lookAtEnv();
 
         this.light = light;
 
     }
-
+    lookAtEnv() {
+        this.envRotMatrix = Mat4.getRoateY(this.envPhi).mult(Mat4.getRoateY(this.envTheta));
+        this.envRotMatrixInverse = this.envRotMatrix.inverse();
+    }
     resetComps() {
         this.numSampleGroupsRendered = 0;
         if(this.comp){

@@ -93,13 +93,15 @@ export class IBL {
         this.model = model
         this.model.setMaterial(new PBRMaterial())
         this.quad = new Quad(this.gl)
-
-        this.envRotMatrix = Mat4.getRoateY(this.envPhi).mult(Mat4.getRoateY(this.envTheta));
-    
-        this.envRotMatrixInverse = this.envRotMatrix.inverse();
-
+        this.lookAtEnv();
         this.light = light;
 
+    }
+
+
+    lookAtEnv() {
+        this.envRotMatrix = Mat4.getRoateY(this.envPhi).mult(Mat4.getRoateY(this.envTheta));
+        this.envRotMatrixInverse = this.envRotMatrix.inverse();
     }
 
     resetComps() {

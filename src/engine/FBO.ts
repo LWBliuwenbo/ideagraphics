@@ -1,4 +1,4 @@
-interface BufferAttachment {
+export interface BufferAttachment {
     owned: boolean;
     buffer: WebGLFramebuffer | WebGLTexture | null
 }
@@ -58,20 +58,19 @@ export class FBO {
         buf4 = -1, buf5 = -1, buf6 = -1, buf7 = -1) {
 
         const outputBuffers: number[] = []
-        let numBufs = 0;
-        if (buf0 >= 0) { outputBuffers[0] = this.gl.COLOR_ATTACHMENT0 + buf0; numBufs = 1; }
-        if (buf1 >= 0) { outputBuffers[1] = this.gl.COLOR_ATTACHMENT0 + buf1; numBufs = 2; }
-        if (buf2 >= 0) { outputBuffers[2] = this.gl.COLOR_ATTACHMENT0 + buf2; numBufs = 3; }
-        if (buf3 >= 0) { outputBuffers[3] = this.gl.COLOR_ATTACHMENT0 + buf3; numBufs = 4; }
-        if (buf4 >= 0) { outputBuffers[4] = this.gl.COLOR_ATTACHMENT0 + buf4; numBufs = 5; }
-        if (buf5 >= 0) { outputBuffers[5] = this.gl.COLOR_ATTACHMENT0 + buf5; numBufs = 6; }
-        if (buf6 >= 0) { outputBuffers[6] = this.gl.COLOR_ATTACHMENT0 + buf6; numBufs = 7; }
-        if (buf7 >= 0) { outputBuffers[7] = this.gl.COLOR_ATTACHMENT0 + buf7; numBufs = 8; }
+        if (buf0 >= 0) { outputBuffers[0] = this.gl.COLOR_ATTACHMENT0 + buf0; }
+        if (buf1 >= 0) { outputBuffers[1] = this.gl.COLOR_ATTACHMENT0 + buf1; }
+        if (buf2 >= 0) { outputBuffers[2] = this.gl.COLOR_ATTACHMENT0 + buf2; }
+        if (buf3 >= 0) { outputBuffers[3] = this.gl.COLOR_ATTACHMENT0 + buf3; }
+        if (buf4 >= 0) { outputBuffers[4] = this.gl.COLOR_ATTACHMENT0 + buf4; }
+        if (buf5 >= 0) { outputBuffers[5] = this.gl.COLOR_ATTACHMENT0 + buf5; }
+        if (buf6 >= 0) { outputBuffers[6] = this.gl.COLOR_ATTACHMENT0 + buf6; }
+        if (buf7 >= 0) { outputBuffers[7] = this.gl.COLOR_ATTACHMENT0 + buf7; }
 
         this.gl.drawBuffers(outputBuffers)
     }
 
-    addColorBuffer(index: number, type: number) {
+    addColorBuffer(index: number) {
         this.bind();
 
         // Now setup a texture to render to

@@ -1,10 +1,9 @@
-import { Vec3 } from "../math/Vector";
 import { Mesh } from "../mesh/Mesh";
 import { Shader } from "../Shader";
 import { parseOBJ } from "./ParseObj";
 
 const FLT_MAX = -1
-const MAX_VERTICES_PER_FACE = 255;
+// const MAX_VERTICES_PER_FACE = 255;
 
 export class Model extends Mesh {
     loaded = false;
@@ -72,9 +71,9 @@ export class Model extends Mesh {
 
     unitizeVertices(vertices: number[], scale: number) {
         const { maxX, minX, maxY, minY, maxZ, minZ } = this;
-        const scaleX = 2.0 / (maxX - minX);
-        const scaleY = 2.0 / (maxY - minY);
-        const scaleZ = 2.0 / (maxZ - minZ);
+        // const scaleX = 2.0 / (maxX - minX);
+        // const scaleY = 2.0 / (maxY - minY);
+        // const scaleZ = 2.0 / (maxZ - minZ);
         const centerX = minX + (maxX - minX) * 0.5;
         const centerY = minY + (maxY - minY) * 0.5;
         const centerZ = minZ + (maxZ - minZ) * 0.5;

@@ -85,7 +85,7 @@ export function parseOBJ(text: string) {
         if (!m) {
             continue;
         }
-        const [, keyword, unparsedArgs] = m;
+        const [, keyword, ] = m;
         const parts = line.split(/\s+/).slice(1);
         const handler = keywords[keyword];
         if (!handler) {

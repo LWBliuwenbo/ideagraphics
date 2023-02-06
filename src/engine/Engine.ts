@@ -5,7 +5,7 @@ import {Shader} from "./Shader"
 import { Camera } from "./Camera"
 import {  Light } from "./Light"
 import { EventSystem } from './EventSystem'
-import { IBL } from "./ibl/IBL"
+// import { IBL } from "./ibl/IBL"
 import { Env } from "./env/Env"
 import { Texture } from "./Texture"
 import { Model } from "./model/Model"
@@ -43,7 +43,7 @@ export default  class Engine {
 
     shader:Shader
 
-    ibl: IBL | null = null
+    // ibl: IBL | null = null
 
     env: Env | null = null
 

@@ -9,8 +9,6 @@ import { Mat4 } from "../math/Mat";
 import { Texture } from "../Texture";
 import { Vec2 } from '../math/Vector';
 import { luminance } from '../untils';
-import { Sphere } from '../mesh/Sphere';
-import { Mesh } from '../mesh/Mesh';
 import { PBRMaterial } from '../Material';
 import { FBO } from '../FBO';
 
@@ -129,12 +127,12 @@ export class IBL {
         this.quad = new Quad(this.gl,0.0, 0.0, this.mSize, this.mSize, 0.0, 0.0, 1.0, 1.0 )
 
         this.fbo = new FBO(this.gl, this.mSize, this.mSize, "FBO")
-        this.fbo.addColorBuffer(0, this.gl.RGBA32F)
+        this.fbo.addColorBuffer(0)
         this.fbo.addDepthBuffer();
         this.fbo.checkStatus();
 
         this.comp = new FBO(this.gl, this.mSize, this.mSize, "Comp")
-        this.comp.addColorBuffer(0, this.gl.RGBA32F)
+        this.comp.addColorBuffer(0)
         this.comp.checkStatus();
 
         this.gl.disable(this.gl.BLEND)

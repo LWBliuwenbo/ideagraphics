@@ -11,6 +11,7 @@ import {Quad} from '../mesh/Quad'
 import { Light } from '../Light';
 import { Camera } from '../Camera';
 import { Model } from '../model/Model';
+import { Mesh } from '../mesh/Mesh';
 
 export const RENDER_NO_IBL = 0
 export const RENDER_REGULAR_SAMPLING = 1
@@ -46,7 +47,7 @@ export class Env {
     timer : number|null = null;
     keepAddingSamples = true;
 
-    models: Model[]
+    models: Mesh[]
     quad: Quad
     // resultShader :Shader
     // compShader: 
@@ -59,7 +60,7 @@ export class Env {
     fbo : FBO | null = null;
 
 
-    constructor(gl: WebGL2RenderingContext, CubeTexture: Texture, models:Model[], light: Light) {
+    constructor(gl: WebGL2RenderingContext, CubeTexture: Texture, models:Mesh[], light: Light) {
         this.gl  = gl;
 
         this.comShader = new Shader(this.gl, quadShaderVertexShader, IBLCompFragShader)

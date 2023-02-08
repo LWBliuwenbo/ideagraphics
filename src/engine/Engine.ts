@@ -10,6 +10,7 @@ import { Env } from "./env/Env"
 import { Texture } from "./Texture"
 import { Model } from "./model/Model"
 import { Material } from "./Material"
+import { CameraView } from "./mesh/CameraView"
 
 /**
  * 引擎类: 用于实例化化图形引擎
@@ -24,7 +25,9 @@ export default  class Engine {
     canvas : HTMLCanvasElement
 
     /** scene 场景 */
-    scene: Model[]
+    scene: Mesh[]
+
+    cameraviewer:CameraView | null;
 
     /** camera 摄像机 */
     camera: Camera
@@ -75,6 +78,7 @@ export default  class Engine {
         this.light = new Light();
         this.eventSystem = new EventSystem(this);
         this.animateid = null;
+        this.cameraviewer = null;
     }
     /** 
      *  添加鼠标移动监听
@@ -91,11 +95,15 @@ export default  class Engine {
     }
 
     /** 添加Mesh */
-    addModel(geo: Model){
+    addModel(geo: Mesh){
         this.scene.push(geo)
         if(this.env){
             this.env.models = this.scene
         }
+    }
+
+    setCameraViewer(cameraviewer: CameraView) {
+        this.cameraviewer = cameraviewer;
     }
 
     /**设置 摄像机 */
@@ -189,6 +197,8 @@ export default  class Engine {
     /**引擎管线：渲染函数 */
     render( ) {
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
+        this.cameraviewer?.draw();
+        
         this.shader.enable();
         if(this.env){
             this.env.draw(this.shader);

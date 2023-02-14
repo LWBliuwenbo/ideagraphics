@@ -10,7 +10,6 @@ import { FBO } from '../FBO';
 import {Quad} from '../mesh/Quad'
 import { Light } from '../Light';
 import { Camera } from '../Camera';
-import { Model } from '../model/Model';
 import { Mesh } from '../mesh/Mesh';
 
 export const RENDER_NO_IBL = 0

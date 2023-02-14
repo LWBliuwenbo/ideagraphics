@@ -1,7 +1,7 @@
-import { Mat3, Mat4 } from "../math/Mat";
+import { Mat4 } from "../math/Mat";
 import { Vec2, Vec3 } from "../math/Vector";
 import { Shader } from "../Shader";
-import { flatten, flattenV2, flattenV4 } from "../untils";
+import { flatten } from "../untils";
 import { Mesh } from "./Mesh";
 
 
@@ -43,7 +43,7 @@ export class CubeQuad {
 
         return this.colors;
     }
-    checkHover(hoverPoint: Vec3, viewPosition: Vec3, projectionMatrix: Mat4, viewMatrix: Mat4, modelMatrix: Mat4) {
+    checkHover(hoverPoint: Vec3, viewPosition: Vec3, projectionMatrix: Mat4, modelMatrix: Mat4) {
 
         const positions = this.pos.map(child=> Mat4.multVe3(child, modelMatrix))
         const normal =  positions[2].sub(positions[0]).cross(positions[1].sub(positions[0]));
@@ -241,7 +241,7 @@ export class Cube extends Mesh {
 
         if (hoverPoint && viewPosition && projectionMatrix && viewMatrix) {
             this.quads.forEach(child => {
-                const isHover = child.checkHover(hoverPoint, viewPosition, projectionMatrix, viewMatrix, modelMatrix)
+                const isHover = child.checkHover(hoverPoint, viewPosition, projectionMatrix, modelMatrix)
                 if (isHover) {
                     this.reColor(child, new Vec3(0.88, 0.13, 0.13))
                 } else {

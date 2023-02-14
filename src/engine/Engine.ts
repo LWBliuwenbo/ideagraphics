@@ -8,7 +8,6 @@ import { EventSystem } from './EventSystem'
 // import { IBL } from "./ibl/IBL"
 import { Env } from "./env/Env"
 import { Texture } from "./Texture"
-import { Model } from "./model/Model"
 import { Material } from "./Material"
 import { CameraView } from "./mesh/CameraView"
 import { Vec3 } from "./math/Vector"

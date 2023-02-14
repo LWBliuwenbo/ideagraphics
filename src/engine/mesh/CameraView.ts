@@ -34,7 +34,7 @@ export class CameraView extends Mesh {
 
 
 
-    draw(shader?: Shader): void {
+    draw(): void {
         if(this.ready == false){
             this.init();
         }

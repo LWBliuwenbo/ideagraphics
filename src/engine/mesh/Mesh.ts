@@ -1,6 +1,6 @@
 import { Transform } from "../Tansform";
 import { Mat4 } from "../math/Mat";
-import {  Vec2, Vec3 } from "../math/Vector";
+import {  Vec3 } from "../math/Vector";
 import {PBRMaterial, Material} from '../Material'
 import {Shader} from '../Shader'
 export abstract class Mesh extends Transform {

@@ -73,6 +73,7 @@ void main()
 
 
     vTextureCoord = aTextureCoord;
+
     
     gl_Position = uProject * uModelView * model * aPosition;
 

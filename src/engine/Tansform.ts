@@ -8,7 +8,59 @@ export class Transform{
     tranlate: Vec3 =  new Vec3(0,0,0)
     scale: Vec3 =  new Vec3(1,1,1)
 
+    roateAnyWayMatirx:Mat4 | null = null;
+    roateAnyWay: boolean = false;
+
     getModelTansformMatrix() {
+      
+
+        const tMat = new Mat4([
+            1.0,  0.0,  0.0, 0.0,
+		    0.0,  1.0,  0.0, 0.0,
+		    0.0,  0.0,  1.0,  0.0,
+		    this.tranlate.x,  this.tranlate.y,  this.tranlate.z, 1.0
+        ])
+
+        const tScale = new Mat4([
+            this.scale.x, 0, 0, 0,
+            0, this.scale.y, 0, 0,
+            0,0, this.scale.z, 0,
+            0,0,0,1
+        ]);
+        if(this.roateAnyWay && this.roateAnyWayMatirx != null){
+            return this.roateAnyWayMatirx.mult(tScale).mult(tMat)
+        }else {
+            return this.getBaseRoate().mult(tScale).mult(tMat)
+        }
+    }
+
+
+    setTranslate(vec: Vec3) {
+        this.tranlate = vec;
+    }
+
+    scaleAll(s: number) {
+        this.scale = new Vec3(s,s,s)
+    }
+
+
+
+    roateX(deg: number) {
+        this.roateAnyWay = false;
+        this.roateTheta.x = deg
+    }
+
+    roateY(deg: number) {
+        this.roateAnyWay = false;
+        this.roateTheta.y = deg
+    }
+
+    roateZ(deg: number) {
+        this.roateAnyWay = false;
+        this.roateTheta.z = deg
+    }
+
+    getBaseRoate() {
         const PI = 3.1415926;
         const angle_x = this.roateTheta.x * PI / (180);
         const angle_y = this.roateTheta.y * PI / (180);
@@ -41,44 +93,33 @@ export class Transform{
 		    0.0,  0.0, 0.0, 1.0
         ])
 
-        const tMat = new Mat4([
-            1.0,  0.0,  0.0, 0.0,
-		    0.0,  1.0,  0.0, 0.0,
-		    0.0,  0.0,  1.0,  0.0,
-		    this.tranlate.x,  this.tranlate.y,  this.tranlate.z, 1.0
+
+        return roateX.mult(roateY).mult(roateZ)
+    }
+
+    roateAnyAxis (axis: Vec3, theta: number) {
+        this.roateAnyWay = true;
+        /**
+         * 将整个坐标轴旋转，使得旋转轴 p 和 z 轴重合
+           再将点 P 绕 z 轴旋转 θ 角
+           再将整个坐标轴旋转回原位
+         */
+        const {x, y, z} = axis.normalize();
+        const PI = Math.PI;
+        const angle = theta * PI / (180);
+        const c = Math.cos(angle)
+        const s = Math.sin(angle)
+        const b = 1 - c
+        const roateMatirx = new Mat4([
+            c + x*x*b, x*y*b + z*s, x*z*b-y*s,0.0,
+            x*y*b-z*s, c+y*y*b, y*z*b+x*s,0.0,
+            x*z*b + y*s, y*z*b - x*s, c+z*z*b,0.0,
+            0,0,0,1
         ])
 
-        const tScale = new Mat4([
-            this.scale.x, 0, 0, 0,
-            0, this.scale.y, 0, 0,
-            0,0, this.scale.z, 0,
-            0,0,0,1
-        ]);
+        this.roateAnyWayMatirx = roateMatirx;
 
-        return roateX.mult(roateY).mult(roateZ).mult(tScale).mult(tMat)
-    }
-
-
-    setTranslate(vec: Vec3) {
-        this.tranlate = vec;
-    }
-
-    scaleAll(s: number) {
-        this.scale = new Vec3(s,s,s)
-    }
-
-
-
-    roateX(deg: number) {
-        this.roateTheta.x = deg
-    }
-
-    roateY(deg: number) {
-        this.roateTheta.y = deg
-    }
-
-    roateZ(deg: number) {
-        this.roateTheta.z = deg
+        return roateMatirx;
     }
 
     tranlateX(distance: number){
@@ -102,4 +143,7 @@ export class Transform{
     scaleZ(distance: number){
         this.scale.z = distance
     }
+
+
+
 }

@@ -158,6 +158,8 @@ export class Model extends Mesh {
         this.gl.enableVertexAttribArray(normal_loc);
     }
 
+    shader.setUniformMat4fv("modelMatrix", this.getModelTansformMatrix())
+
     this.gl.drawArrays(this.gl.TRIANGLES, 0, this.vertexData.length/3)
 
 

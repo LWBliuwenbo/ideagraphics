@@ -11,6 +11,7 @@ import { Texture } from "./Texture"
 import { Model } from "./model/Model"
 import { Material } from "./Material"
 import { CameraView } from "./mesh/CameraView"
+import { Vec3 } from "./math/Vector"
 
 /**
  * 引擎类: 用于实例化化图形引擎
@@ -49,6 +50,9 @@ export default  class Engine {
     // ibl: IBL | null = null
 
     env: Env | null = null
+
+    enableHover: boolean = false
+    hoverPoint:{x: number, y: number} = {x:-10,y:-10} 
 
     /**
      * Engine 构造器
@@ -145,6 +149,17 @@ export default  class Engine {
         }
     }
 
+    enableHoverByNormal(enable: boolean) {
+        if(enable){
+            this.enableHover = enable;
+            this.gl.canvas.addEventListener('mousemove', (e)=> {
+                const {offsetX, offsetY} = e as MouseEvent;
+                this.hoverPoint.x = (offsetX/this.gl.canvas.width)*2 - 1;
+                this.hoverPoint.y = (offsetY/this.gl.canvas.height)*-2 + 1;
+            })
+        }
+    }
+
     // setIBL( ibl:IBL ) {
     //     this.ibl = ibl;
     // }
@@ -175,9 +190,9 @@ export default  class Engine {
         // Camera
         this.shader.enable();
         this.shader?.setUniform3fv('viewPosition', this.camera.viewPosition)
-        this.shader?.setUniformMat4fv('modelViewMatrix', this.camera.modelViewMatrix)
-        const normalMatrix = this.camera.modelViewMatrix.inverse()
-        this.shader?.setUniformMat4fv('normalMatrix', normalMatrix)
+        this.shader?.setUniformMat4fv('viewMatrix', this.camera.modelViewMatrix)
+        // const normalMatrix = this.camera.modelViewMatrix.inverse()
+        // this.shader?.setUniformMat4fv('normalMatrix', normalMatrix)
         this.shader?.setUniformMat4fv('projectionMatrix', this.camera.projectionMatrix)
     }
 
@@ -191,11 +206,15 @@ export default  class Engine {
         this.shader.setUniformf( "gamma", this.light.gamma );
         this.shader.setUniformf( "exposure", this.light.exposure );
         this.shader.setUniformf( "useNDotL", this.light.useNDotL ? 1.0 : 0.0 );
+        this.shader.setUniformf( "enableHover", this.enableHover ? 1.0 : 0.0 );
+        
     }
 
   
     /**引擎管线：渲染函数 */
-    render( ) {
+    render(predeal?:()=>void) {
+
+        predeal && predeal();
         this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT)
         this.cameraviewer?.draw();
         
@@ -204,12 +223,17 @@ export default  class Engine {
             this.env.draw(this.shader);
         }else {
             this.scene.forEach((mesh:Mesh)=> {
+
                 mesh.material.draw(this.shader);
-                mesh.draw(this.shader)
+                if(mesh.hovercheck && this.enableHover){
+                    mesh.draw(this.shader, new Vec3(this.hoverPoint.x, this.hoverPoint.y, 0), this.camera.viewPosition, this.camera.projectionMatrix, this.camera.modelViewMatrix)
+                }else {
+                    mesh.draw(this.shader)
+                }
             })
         }
 
-         this.animateid = requestAnimationFrame(this.render.bind(this))
+        this.animateid = requestAnimationFrame(this.render.bind(this, predeal))
 
 
     }

@@ -10,12 +10,14 @@ uniform float brightness;
 uniform float gamma;
 uniform float exposure;
 uniform float useNDotL;
+uniform float enableHover;
 
 in vec4 worldSpaceVert;
 in vec4 eyeSpaceVert;
 in vec3 eyeSpaceNormal;
 in vec3 eyeSpaceTangent;
 in vec3 eyeSpaceBitangent;
+in vec3 fragbaseColor;
 
 out vec4 fragColor;
 
@@ -318,6 +320,11 @@ void main(void)
     // gamma
     b = pow( b, vec3( 1.0 / gamma ) );
 
-    fragColor = vec4( clamp( b, vec3(0.0), vec3(1.0) ), 1.0 );
+    if(enableHover > 0.5){
+        fragColor = vec4(fragbaseColor,1.0);
+    }   else {
+        fragColor = vec4( clamp( b, vec3(0.0), vec3(1.0) ), 1.0 );
+    }
+
 }
 

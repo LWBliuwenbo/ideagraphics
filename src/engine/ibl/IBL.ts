@@ -99,7 +99,7 @@ export class IBL {
 
     lookAtEnv() {
         this.envRotMatrix = Mat4.getRoateY(this.envPhi).mult(Mat4.getRoateY(this.envTheta));
-        this.envRotMatrixInverse = this.envRotMatrix.inverse();
+        this.envRotMatrixInverse = this.envRotMatrix.transpose();
     }
 
     resetComps() {
